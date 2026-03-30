@@ -48,6 +48,14 @@ Every package extends `tsconfig.base.json` which sets `composite: true`. The roo
 - `pnpm run build` — runs `typecheck` first, then recursively runs `build` in all packages that define it
 - `pnpm run typecheck` — runs `tsc --build --emitDeclarationOnly` using project references
 
+## Medical Voice Translator
+
+A standalone Streamlit Python app at `artifacts/medical-voice-translator/app.py`.
+
+- **Run:** `streamlit run app.py --server.port 5000` (or via the "Medical Voice Translator" workflow)
+- **Requirements:** `streamlit`, `deep-translator`, `gtts`, `SpeechRecognition`, `pyaudio`
+- **Features:** English ↔ Spanish translation, gTTS audio playback, preset medical phrases, optional mic voice input
+
 ## Packages
 
 ### `artifacts/api-server` (`@workspace/api-server`)
