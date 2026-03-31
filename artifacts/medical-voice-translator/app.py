@@ -141,12 +141,27 @@ user_input = st.text_area(
 
 # ── Voice input (optional) ────────────────────────────────────────────────────
 if VOICE_INPUT_AVAILABLE:
+    
+    '''
     if st.button("🎙️ Record Voice Input"):
-        spoken = listen_from_microphone(mic_lang_code)
-        st.session_state.input_text = spoken
-        st.rerun()
-else:
-    st.caption("_Voice input is not available in this environment (microphone access required)._")
+       spoken = listen_from_microphone(mic_lang_code)
+       st.session_state.input_text = spoken
+       st.rerun()
+
+    '''
+    audio = st.audio_input("Record your voice Input")
+    if audio:
+        recognizer = sr.Recognizer()
+        with sr.AudioFile(audio) as source:
+            audio_data = recognizer.record(source)
+        try:
+            spoken = recognizer.recognize_google(audio_data, language=mic_lang_code)
+            st.session_state.input_text = spoken
+            st.rerun()
+        except sr.UnknownValueError:
+            st.error("Could not understand audio, please try again")
+        except sr.RequestError:
+            st.error("Speech recognition service unavailable")
 
 # ── Translate button ─────────────────────────────────────────────────────────
 if st.button("🔄 Translate", type="primary"):
