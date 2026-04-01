@@ -127,8 +127,9 @@ st.markdown("""
     }
     [data-testid="stAudioInput"] { width: 100% !important; }
     .stAlert { border-radius: 10px !important; font-size: 16px !important; }
-    h1 { display: none !important; }
+    [data-testid="stHeadingWithActionElements"] { display: none !important; }
     h2, h3 { font-size: 1.2rem !important; }
+    .custom-title { animation: none !important; opacity: 1 !important; }
     audio { width: 100% !important; border-radius: 8px; display: block; }
 </style>
 """, unsafe_allow_html=True)
@@ -146,7 +147,7 @@ for key, default in {
 
 # Custom title — single line on all screen sizes
 st.markdown("""
-<div style="padding: 0.5rem 0 1rem 0;">
+<div class="custom-title" style="padding: 0.5rem 0 1rem 0;">
     <div style="font-size: clamp(1.1rem, 5.5vw, 1.75rem); font-weight: 700; white-space: nowrap; letter-spacing: -0.3px; line-height: 1.2; color: inherit;">
         🩺 Medical Voice Translator
     </div>
