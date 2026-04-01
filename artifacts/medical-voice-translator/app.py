@@ -27,12 +27,13 @@ def translate_text(text: str, direction: str) -> str:
         return f"Translation error: {e}"
 
 
-def generate_audio_b64(text: str, lang: str) -> str:
+def generate_audio_bytes(text: str, lang: str) -> bytes:
+    """Return raw MP3 bytes directly — no base64."""
     tts = gTTS(text=text, lang=lang)
     buf = io.BytesIO()
     tts.write_to_fp(buf)
     buf.seek(0)
-    return base64.b64encode(buf.read()).decode()
+    return buf.read()
 
 
 def process_audio_input(audio, mic_lang_code):
@@ -62,46 +63,11 @@ def do_translate(text):
     direction  = st.session_state.direction
     tgt_lang   = "es" if direction == "en->es" else "en"
     translated = translate_text(text, direction)
-    audio_b64  = generate_audio_b64(translated, tgt_lang)
-    st.session_state.translated    = translated
-    st.session_state.tgt_lang      = tgt_lang
-    st.session_state.audio_b64     = audio_b64
-    # Increment counter so every new translation gets a unique slot
-    st.session_state.audio_version = st.session_state.get("audio_version", 0) + 1
-
-
-def render_audio(b64: str, version: int):
-    """
-    Render audio in a versioned container.
-    JS removes any previous container and inserts a brand-new <audio> element
-    so the browser never reuses a cached one.
-    """
-    st.markdown(f"""
-    <div id="audio-slot"></div>
-    <script>
-    (function() {{
-        var slot = document.getElementById('audio-slot');
-        if (!slot) return;
-        slot.innerHTML = '';
-        var wrapper = document.createElement('div');
-        wrapper.style.marginTop = '8px';
-        var label = document.createElement('p');
-        label.style.cssText = 'font-size:13px;color:#666;margin-bottom:4px;';
-        label.textContent = '🔊 Translation Audio';
-        var audio = document.createElement('audio');
-        audio.controls = true;
-        audio.style.cssText = 'width:100%;border-radius:8px;';
-        var source = document.createElement('source');
-        source.src = 'data:audio/mp3;base64,{b64}';
-        source.type = 'audio/mp3';
-        audio.appendChild(source);
-        audio.load();
-        wrapper.appendChild(label);
-        wrapper.appendChild(audio);
-        slot.appendChild(wrapper);
-    }})();
-    </script>
-    """, unsafe_allow_html=True)
+    audio_bytes = generate_audio_bytes(translated, tgt_lang)
+    st.session_state.translated  = translated
+    st.session_state.tgt_lang    = tgt_lang
+    # Store raw bytes directly in session state
+    st.session_state.audio_bytes = audio_bytes
 
 
 MEDICAL_PHRASES_EN = [
@@ -140,7 +106,6 @@ st.markdown("""
     .stAlert { border-radius: 10px !important; font-size: 16px !important; }
     h1 { font-size: 1.6rem !important; line-height: 1.3 !important; }
     h2, h3 { font-size: 1.2rem !important; }
-    audio { width: 100% !important; border-radius: 8px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -150,8 +115,7 @@ for key, default in {
     "translated": "",
     "tgt_lang": "es",
     "last_audio_id": None,
-    "audio_b64": None,
-    "audio_version": 0,
+    "audio_bytes": None,
     "input_text": "",
 }.items():
     if key not in st.session_state:
@@ -171,12 +135,12 @@ with col2:
 if en_to_es:
     st.session_state.update({
         "direction": "en->es", "translated": "",
-        "audio_b64": None, "audio_version": 0, "input_text": ""
+        "audio_bytes": None, "input_text": ""
     })
 if es_to_en:
     st.session_state.update({
         "direction": "es->en", "translated": "",
-        "audio_b64": None, "audio_version": 0, "input_text": ""
+        "audio_bytes": None, "input_text": ""
     })
 
 direction      = st.session_state.direction
@@ -231,8 +195,10 @@ if st.button("🔄 Translate", type="primary", use_container_width=True):
 st.subheader("Translation")
 if st.session_state.translated:
     st.success(st.session_state.translated)
-    if st.session_state.audio_b64:
-        render_audio(st.session_state.audio_b64, st.session_state.audio_version)
+
+if st.session_state.audio_bytes:
+    st.caption("🔊 Translation Audio")
+    st.audio(st.session_state.audio_bytes, format="audio/mp3")
 
 st.divider()
 
@@ -253,5 +219,5 @@ for phrase in phrases:
         st.session_state.input_text = phrase
         st.markdown(f"**Original:** {phrase}")
         st.success(f"**Translation:** {st.session_state.translated}")
-        if st.session_state.audio_b64:
-            render_audio(st.session_state.audio_b64, st.session_state.audio_version)
+        if st.session_state.audio_bytes:
+            st.audio(st.session_state.audio_bytes, format="audio/mp3")
