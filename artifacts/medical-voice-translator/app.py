@@ -142,13 +142,11 @@ user_input = st.text_area(
 # ── Voice input (optional) ────────────────────────────────────────────────────
 if VOICE_INPUT_AVAILABLE:
     
-    '''
-    if st.button("🎙️ Record Voice Input"):
-       spoken = listen_from_microphone(mic_lang_code)
-       st.session_state.input_text = spoken
-       st.rerun()
+    #if st.button("🎙️ Record Voice Input"):
+    #   spoken = listen_from_microphone(mic_lang_code)
+    #   st.session_state.input_text = spoken
+    #   st.rerun()
 
-    '''
     audio = st.audio_input("Record your voice Input")
     if audio:
         recognizer = sr.Recognizer()
