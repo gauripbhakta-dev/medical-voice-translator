@@ -59,19 +59,49 @@ def process_audio_input(audio, mic_lang_code):
 
 
 def do_translate(text):
-    """
-    Translate text using current direction from session state.
-    Derives tgt_lang_code internally so it's always correct.
-    """
-    direction = st.session_state.direction
-    tgt_lang  = "es" if direction == "en->es" else "en"
+    direction  = st.session_state.direction
+    tgt_lang   = "es" if direction == "en->es" else "en"
     translated = translate_text(text, direction)
     audio_b64  = generate_audio_b64(translated, tgt_lang)
-    st.session_state.translated = translated
-    st.session_state.tgt_lang   = tgt_lang
-    # Use a unique key so the audio element re-renders fresh every time
-    st.session_state.audio_b64  = audio_b64
-    st.session_state.audio_key  = hash(audio_b64)
+    st.session_state.translated    = translated
+    st.session_state.tgt_lang      = tgt_lang
+    st.session_state.audio_b64     = audio_b64
+    # Increment counter so every new translation gets a unique slot
+    st.session_state.audio_version = st.session_state.get("audio_version", 0) + 1
+
+
+def render_audio(b64: str, version: int):
+    """
+    Render audio in a versioned container.
+    JS removes any previous container and inserts a brand-new <audio> element
+    so the browser never reuses a cached one.
+    """
+    st.markdown(f"""
+    <div id="audio-slot"></div>
+    <script>
+    (function() {{
+        var slot = document.getElementById('audio-slot');
+        if (!slot) return;
+        slot.innerHTML = '';
+        var wrapper = document.createElement('div');
+        wrapper.style.marginTop = '8px';
+        var label = document.createElement('p');
+        label.style.cssText = 'font-size:13px;color:#666;margin-bottom:4px;';
+        label.textContent = '🔊 Translation Audio';
+        var audio = document.createElement('audio');
+        audio.controls = true;
+        audio.style.cssText = 'width:100%;border-radius:8px;';
+        var source = document.createElement('source');
+        source.src = 'data:audio/mp3;base64,{b64}';
+        source.type = 'audio/mp3';
+        audio.appendChild(source);
+        audio.load();
+        wrapper.appendChild(label);
+        wrapper.appendChild(audio);
+        slot.appendChild(wrapper);
+    }})();
+    </script>
+    """, unsafe_allow_html=True)
 
 
 MEDICAL_PHRASES_EN = [
@@ -121,7 +151,7 @@ for key, default in {
     "tgt_lang": "es",
     "last_audio_id": None,
     "audio_b64": None,
-    "audio_key": 0,
+    "audio_version": 0,
     "input_text": "",
 }.items():
     if key not in st.session_state:
@@ -139,25 +169,21 @@ with col2:
     es_to_en = st.button("🇪🇸 ES → EN", use_container_width=True)
 
 if en_to_es:
-    st.session_state.direction  = "en->es"
-    st.session_state.translated = ""
-    st.session_state.audio_b64  = None
-    st.session_state.audio_key  = 0
-    st.session_state.input_text = ""
+    st.session_state.update({
+        "direction": "en->es", "translated": "",
+        "audio_b64": None, "audio_version": 0, "input_text": ""
+    })
 if es_to_en:
-    st.session_state.direction  = "es->en"
-    st.session_state.translated = ""
-    st.session_state.audio_b64  = None
-    st.session_state.audio_key  = 0
-    st.session_state.input_text = ""
+    st.session_state.update({
+        "direction": "es->en", "translated": "",
+        "audio_b64": None, "audio_version": 0, "input_text": ""
+    })
 
-# Derive lang labels AFTER direction buttons are processed
 direction      = st.session_state.direction
 src_lang_label = "English" if direction == "en->es" else "Spanish"
-tgt_lang_label = "Spanish" if direction == "en->es" else "English"
 mic_lang_code  = "en-US"   if direction == "en->es" else "es-ES"
 
-st.info(f"**Mode:** {src_lang_label} → {tgt_lang_label}")
+st.info(f"**Mode:** {'English → Spanish' if direction == 'en->es' else 'Spanish → English'}")
 
 # ── Voice input ───────────────────────────────────────────────────────────────
 if VOICE_INPUT_AVAILABLE:
@@ -178,7 +204,7 @@ if VOICE_INPUT_AVAILABLE:
             if spoken:
                 st.session_state.input_text = spoken
                 with st.spinner("Translating..."):
-                    do_translate(spoken)   # uses st.session_state.direction internally
+                    do_translate(spoken)
                 st.success(f"✅ Heard: *{spoken}*")
 
 # ── Text input ───────────────────────────────────────────────────────────────
@@ -195,27 +221,18 @@ st.session_state.input_text = typed_text
 # ── Translate button ─────────────────────────────────────────────────────────
 st.markdown("<div style='margin-top:12px;'></div>", unsafe_allow_html=True)
 if st.button("🔄 Translate", type="primary", use_container_width=True):
-    text_to_translate = st.session_state.input_text.strip()
-    if text_to_translate:
+    if st.session_state.input_text.strip():
         with st.spinner("Translating..."):
-            do_translate(text_to_translate)
+            do_translate(st.session_state.input_text.strip())
     else:
         st.warning("Please type or record some text before translating.")
 
-# ── Translation result + audio player ────────────────────────────────────────
+# ── Translation result + audio ────────────────────────────────────────────────
 st.subheader("Translation")
 if st.session_state.translated:
     st.success(st.session_state.translated)
     if st.session_state.audio_b64:
-        # audio_key changes every translation so the element re-renders fresh
-        st.markdown(f"""
-        <div style="margin-top:8px;" id="audio-{st.session_state.audio_key}">
-            <p style="font-size:13px; color:#666; margin-bottom:4px;">🔊 Translation Audio</p>
-            <audio controls style="width:100%; border-radius:8px;">
-                <source src="data:audio/mp3;base64,{st.session_state.audio_b64}" type="audio/mp3">
-            </audio>
-        </div>
-        """, unsafe_allow_html=True)
+        render_audio(st.session_state.audio_b64, st.session_state.audio_version)
 
 st.divider()
 
@@ -223,23 +240,18 @@ st.divider()
 st.subheader("⚕️ Common Medical Phrases")
 
 if direction == "en->es":
-    display_phrases = MEDICAL_PHRASES_EN
-    source_phrases  = MEDICAL_PHRASES_EN
+    phrases = MEDICAL_PHRASES_EN
     st.caption("Tap a phrase to translate it to Spanish and hear the audio.")
 else:
-    display_phrases = MEDICAL_PHRASES_ES
-    source_phrases  = MEDICAL_PHRASES_ES
+    phrases = MEDICAL_PHRASES_ES
     st.caption("Toca una frase para traducirla al inglés y escuchar el audio.")
 
-for display_phrase, src_phrase in zip(display_phrases, source_phrases):
-    if st.button(display_phrase, use_container_width=True):
+for phrase in phrases:
+    if st.button(phrase, use_container_width=True):
         with st.spinner("Translating..."):
-            do_translate(src_phrase)
-        st.session_state.input_text = src_phrase
-        st.markdown(f"**Original:** {src_phrase}")
+            do_translate(phrase)
+        st.session_state.input_text = phrase
+        st.markdown(f"**Original:** {phrase}")
         st.success(f"**Translation:** {st.session_state.translated}")
-        st.markdown(f"""
-        <audio controls style="width:100%; border-radius:8px; margin-top:8px;">
-            <source src="data:audio/mp3;base64,{st.session_state.audio_b64}" type="audio/mp3">
-        </audio>
-        """, unsafe_allow_html=True)
+        if st.session_state.audio_b64:
+            render_audio(st.session_state.audio_b64, st.session_state.audio_version)
