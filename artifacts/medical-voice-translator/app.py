@@ -1,8 +1,9 @@
 """
-Medical Voice Translator
-Translates medical phrases between English and Spanish,
-generates audio with gTTS, and optionally accepts voice input.
-Mobile-optimized for iOS and Android.
+Medical Voice Translator - Fixed version
+- Text area always translates current typed text
+- Voice recording feeds correctly into translation
+- Audio plays automatically after translation
+- Medical phrases switch language based on direction
 """
 
 import io
@@ -25,8 +26,7 @@ def translate_text(text: str, direction: str) -> str:
         return ""
     src, tgt = direction.split("->")
     try:
-        result = GoogleTranslator(source=src, target=tgt).translate(text)
-        return result
+        return GoogleTranslator(source=src, target=tgt).translate(text)
     except Exception as e:
         return f"Translation error: {e}"
 
@@ -39,23 +39,8 @@ def generate_audio_b64(text: str, lang: str) -> str:
     return base64.b64encode(buf.read()).decode()
 
 
-def render_audio_player(text: str, lang: str):
-    """Render audio player inline — no button needed."""
-    if not text.strip():
-        return
-    b64 = generate_audio_b64(text, lang)
-    audio_html = f"""
-    <audio controls style="width:100%; margin-top:8px; border-radius:8px;">
-        <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
-        Your browser does not support the audio element.
-    </audio>
-    """
-    st.markdown(audio_html, unsafe_allow_html=True)
-
-
 def process_audio_input(audio, mic_lang_code):
     if not VOICE_INPUT_AVAILABLE:
-        st.error("Speech recognition not available.")
         return None
     recognizer = sr.Recognizer()
     try:
@@ -65,24 +50,32 @@ def process_audio_input(audio, mic_lang_code):
         with sr.AudioFile(tmp_path) as source:
             audio_data = recognizer.record(source)
         os.unlink(tmp_path)
-        spoken = recognizer.recognize_google(audio_data, language=mic_lang_code)
-        return spoken
+        return recognizer.recognize_google(audio_data, language=mic_lang_code)
     except sr.UnknownValueError:
         st.error("Could not understand audio, please try again.")
         return None
     except sr.RequestError as e:
-        st.error(f"Speech recognition service unavailable: {e}")
+        st.error(f"Speech recognition unavailable: {e}")
         return None
     except Exception as e:
-        st.error(f"Audio processing error: {e}")
+        st.error(f"Audio error: {e}")
         return None
 
 
-MEDICAL_PHRASES = [
+# Phrases always stored in English internally
+MEDICAL_PHRASES_EN = [
     "Where is your pain?",
     "Do you have allergies?",
     "Rate your pain from 1 to 10",
     "Are you taking any medication?",
+]
+
+# Pre-translated Spanish versions
+MEDICAL_PHRASES_ES = [
+    "¿Dónde le duele?",
+    "¿Tiene alergias?",
+    "Califique su dolor del 1 al 10",
+    "¿Está tomando algún medicamento?",
 ]
 
 st.set_page_config(
@@ -112,18 +105,15 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ── Session state defaults ───────────────────────────────────────────────────
-if "direction" not in st.session_state:
-    st.session_state.direction = "en->es"
-if "input_text" not in st.session_state:
-    st.session_state.input_text = ""
-if "translated" not in st.session_state:
-    st.session_state.translated = ""
-if "tgt_lang" not in st.session_state:
-    st.session_state.tgt_lang = "es"
-if "last_audio_id" not in st.session_state:
-    st.session_state.last_audio_id = None
-if "audio_b64" not in st.session_state:
-    st.session_state.audio_b64 = None
+for key, default in {
+    "direction": "en->es",
+    "translated": "",
+    "tgt_lang": "es",
+    "last_audio_id": None,
+    "audio_b64": None,
+}.items():
+    if key not in st.session_state:
+        st.session_state[key] = default
 
 st.title("🩺 Medical Voice Translator")
 st.caption("Translate medical phrases between English and Spanish — with audio playback.")
@@ -152,24 +142,12 @@ mic_lang_code  = "en-US"   if st.session_state.direction == "en->es" else "es-ES
 
 st.info(f"**Mode:** {src_lang_label} → {tgt_lang_label}")
 
-# ── Text input ───────────────────────────────────────────────────────────────
-st.subheader("Enter Text")
-
-user_input = st.text_area(
-    f"Type in {src_lang_label}:",
-    value=st.session_state.input_text,
-    height=120,
-    placeholder=f"Enter {src_lang_label} text here…",
-    key="text_input_area"
-)
-
 # ── Voice input ───────────────────────────────────────────────────────────────
 if VOICE_INPUT_AVAILABLE:
     st.markdown("**🎙️ Voice Input**")
     st.markdown("""
     <div style="font-size:13px; color:#666; margin-bottom:8px;">
-        📱 <b>iPhone/Android:</b> Tap the microphone, speak your phrase, tap stop.
-        The transcribed text will appear below. Then tap Translate.
+        📱 <b>iPhone/Android:</b> Tap the microphone, speak, tap stop. Then tap Translate.
     </div>
     """, unsafe_allow_html=True)
 
@@ -182,67 +160,74 @@ if VOICE_INPUT_AVAILABLE:
             with st.spinner("Transcribing..."):
                 spoken = process_audio_input(audio, mic_lang_code)
             if spoken:
-                st.session_state.input_text = spoken
-                user_input = spoken
+                st.session_state["user_text_input"] = spoken
                 st.success(f"✅ Heard: *{spoken}*")
+
+# ── Text input ───────────────────────────────────────────────────────────────
+st.subheader("Enter Text")
+st.text_area(
+    f"Type in {src_lang_label}:",
+    height=120,
+    placeholder=f"Enter {src_lang_label} text here…",
+    key="user_text_input",
+)
 
 # ── Translate button ─────────────────────────────────────────────────────────
 st.markdown("<div style='margin-top:12px;'></div>", unsafe_allow_html=True)
 if st.button("🔄 Translate", type="primary", use_container_width=True):
-    text_to_translate = user_input or st.session_state.input_text
-    if text_to_translate.strip():
+    text_to_translate = st.session_state.get("user_text_input", "").strip()
+    if text_to_translate:
         with st.spinner("Translating..."):
             translated = translate_text(text_to_translate, st.session_state.direction)
-            # Pre-generate audio immediately so no extra button needed
-            audio_b64 = generate_audio_b64(translated, tgt_lang_code)
+            audio_b64  = generate_audio_b64(translated, tgt_lang_code)
         st.session_state.translated = translated
-        st.session_state.tgt_lang = tgt_lang_code
-        st.session_state.audio_b64 = audio_b64
+        st.session_state.tgt_lang   = tgt_lang_code
+        st.session_state.audio_b64  = audio_b64
     else:
-        st.warning("Please enter or record some text before translating.")
+        st.warning("Please type or record some text before translating.")
 
 # ── Translation result + auto audio player ────────────────────────────────────
 st.subheader("Translation")
-
 if st.session_state.translated:
     st.success(st.session_state.translated)
-
-    # Auto-render audio player — no button click needed
     if st.session_state.audio_b64:
-        b64 = st.session_state.audio_b64
-        audio_html = f"""
+        st.markdown(f"""
         <div style="margin-top:8px;">
             <p style="font-size:13px; color:#666; margin-bottom:4px;">🔊 Translation Audio</p>
             <audio controls style="width:100%; border-radius:8px;">
-                <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
-                Your browser does not support the audio element.
+                <source src="data:audio/mp3;base64,{st.session_state.audio_b64}" type="audio/mp3">
             </audio>
         </div>
-        """
-        st.markdown(audio_html, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
 st.divider()
 
 # ── Preset medical phrases ────────────────────────────────────────────────────
 st.subheader("⚕️ Common Medical Phrases")
-st.caption("Tap a phrase to translate it and hear the audio.")
 
-for phrase in MEDICAL_PHRASES:
-    if st.button(phrase, use_container_width=True):
-        direction  = st.session_state.direction
-        src_phrase = phrase if direction == "en->es" else translate_text(phrase, "en->es")
+# Show phrases in the SOURCE language based on current direction
+if st.session_state.direction == "en->es":
+    display_phrases = MEDICAL_PHRASES_EN
+    source_phrases  = MEDICAL_PHRASES_EN   # English phrase is the input
+    st.caption("Tap a phrase to translate it to Spanish and hear the audio.")
+else:
+    display_phrases = MEDICAL_PHRASES_ES
+    source_phrases  = MEDICAL_PHRASES_ES   # Spanish phrase is the input
+    st.caption("Toca una frase para traducirla al inglés y escuchar el audio.")
+
+for display_phrase, src_phrase in zip(display_phrases, source_phrases):
+    if st.button(display_phrase, use_container_width=True):
         with st.spinner("Translating..."):
-            translated = translate_text(src_phrase, direction)
+            translated = translate_text(src_phrase, st.session_state.direction)
             audio_b64  = generate_audio_b64(translated, tgt_lang_code)
-        st.session_state.input_text = src_phrase
+        st.session_state["user_text_input"] = src_phrase
         st.session_state.translated = translated
-        st.session_state.tgt_lang = tgt_lang_code
-        st.session_state.audio_b64 = audio_b64
+        st.session_state.tgt_lang   = tgt_lang_code
+        st.session_state.audio_b64  = audio_b64
         st.markdown(f"**Original:** {src_phrase}")
         st.success(f"**Translation:** {translated}")
-        b64 = audio_b64
         st.markdown(f"""
         <audio controls style="width:100%; border-radius:8px; margin-top:8px;">
-            <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
+            <source src="data:audio/mp3;base64,{audio_b64}" type="audio/mp3">
         </audio>
         """, unsafe_allow_html=True)
