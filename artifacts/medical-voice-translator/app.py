@@ -27,13 +27,19 @@ def translate_text(text: str, direction: str) -> str:
         return f"Translation error: {e}"
 
 
-def generate_audio_bytes(text: str, lang: str) -> bytes:
-    """Return raw MP3 bytes directly — no base64."""
-    tts = gTTS(text=text, lang=lang)
-    buf = io.BytesIO()
-    tts.write_to_fp(buf)
-    buf.seek(0)
-    return buf.read()
+def generate_audio_b64(text: str, lang: str):
+    try:
+        tts = gTTS(text=text, lang=lang)
+        buf = io.BytesIO()
+        tts.write_to_fp(buf)
+        buf.seek(0)
+        data = buf.read()
+        if len(data) < 100:
+            return None
+        return base64.b64encode(data).decode()
+    except Exception as e:
+        st.warning(f"Audio generation failed: {e}")
+        return None
 
 
 def process_audio_input(audio, mic_lang_code):
@@ -63,11 +69,27 @@ def do_translate(text):
     direction  = st.session_state.direction
     tgt_lang   = "es" if direction == "en->es" else "en"
     translated = translate_text(text, direction)
-    audio_bytes = generate_audio_bytes(translated, tgt_lang)
-    st.session_state.translated  = translated
-    st.session_state.tgt_lang    = tgt_lang
-    # Store raw bytes directly in session state
-    st.session_state.audio_bytes = audio_bytes
+    audio_b64  = generate_audio_b64(translated, tgt_lang)
+    st.session_state.translated = translated
+    st.session_state.tgt_lang   = tgt_lang
+    st.session_state.audio_b64  = audio_b64
+
+
+def render_audio(b64: str):
+    # Use audio/mpeg for iOS compatibility, mp3 as fallback for others
+    st.markdown(f"""
+    <div style="margin-top:8px;">
+        <p style="font-size:13px; color:#666; margin-bottom:6px;">🔊 Translation Audio</p>
+        <audio controls preload="auto"
+               style="width:100%; min-height:40px; border-radius:8px; display:block;">
+            <source src="data:audio/mpeg;base64,{b64}" type="audio/mpeg">
+            <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
+        </audio>
+        <p style="font-size:11px; color:#aaa; margin-top:4px;">
+            iPhone: tap the play button above to hear audio.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 MEDICAL_PHRASES_EN = [
@@ -104,25 +126,34 @@ st.markdown("""
     }
     [data-testid="stAudioInput"] { width: 100% !important; }
     .stAlert { border-radius: 10px !important; font-size: 16px !important; }
-    h1 { font-size: 1.6rem !important; line-height: 1.3 !important; }
+    h1 { display: none !important; }
     h2, h3 { font-size: 1.2rem !important; }
+    audio { width: 100% !important; border-radius: 8px; display: block; }
 </style>
 """, unsafe_allow_html=True)
 
-# ── Session state defaults ───────────────────────────────────────────────────
 for key, default in {
     "direction": "en->es",
     "translated": "",
     "tgt_lang": "es",
     "last_audio_id": None,
-    "audio_bytes": None,
+    "audio_b64": None,
     "input_text": "",
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
 
-st.title("🩺 Medical Voice Translator")
-st.caption("Translate medical phrases between English and Spanish — with audio playback.")
+# Custom title — single line on all screen sizes
+st.markdown("""
+<div style="padding: 0.5rem 0 1rem 0;">
+    <div style="font-size: clamp(1.1rem, 5.5vw, 1.75rem); font-weight: 700; white-space: nowrap; letter-spacing: -0.3px; line-height: 1.2; color: inherit;">
+        🩺 Medical Voice Translator
+    </div>
+    <div style="font-size: 13px; color: #888; margin-top: 4px;">
+        Translate medical phrases between English and Spanish — with audio playback.
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # ── Direction selector ───────────────────────────────────────────────────────
 st.subheader("Translation Direction")
@@ -133,15 +164,9 @@ with col2:
     es_to_en = st.button("🇪🇸 ES → EN", use_container_width=True)
 
 if en_to_es:
-    st.session_state.update({
-        "direction": "en->es", "translated": "",
-        "audio_bytes": None, "input_text": ""
-    })
+    st.session_state.update({"direction":"en->es","translated":"","audio_b64":None,"input_text":""})
 if es_to_en:
-    st.session_state.update({
-        "direction": "es->en", "translated": "",
-        "audio_bytes": None, "input_text": ""
-    })
+    st.session_state.update({"direction":"es->en","translated":"","audio_b64":None,"input_text":""})
 
 direction      = st.session_state.direction
 src_lang_label = "English" if direction == "en->es" else "Spanish"
@@ -195,10 +220,8 @@ if st.button("🔄 Translate", type="primary", use_container_width=True):
 st.subheader("Translation")
 if st.session_state.translated:
     st.success(st.session_state.translated)
-
-if st.session_state.audio_bytes:
-    st.caption("🔊 Translation Audio")
-    st.audio(st.session_state.audio_bytes, format="audio/mp3")
+if st.session_state.audio_b64:
+    render_audio(st.session_state.audio_b64)
 
 st.divider()
 
@@ -219,5 +242,5 @@ for phrase in phrases:
         st.session_state.input_text = phrase
         st.markdown(f"**Original:** {phrase}")
         st.success(f"**Translation:** {st.session_state.translated}")
-        if st.session_state.audio_bytes:
-            st.audio(st.session_state.audio_bytes, format="audio/mp3")
+        if st.session_state.audio_b64:
+            render_audio(st.session_state.audio_b64)
