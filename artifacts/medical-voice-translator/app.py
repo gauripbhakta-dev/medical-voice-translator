@@ -118,7 +118,7 @@ st.markdown("""
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <style>
     html, body, [class*="css"] { font-size: 16px !important; -webkit-text-size-adjust: 100%; }
-    .block-container { padding-left: 1rem !important; padding-right: 1rem !important; padding-top: 1rem !important; max-width: 100% !important; }
+    .block-container { padding-left: 1rem !important; padding-right: 1rem !important; padding-top: 2.5rem !important; max-width: 100% !important; }
     .stButton > button { min-height: 52px !important; font-size: 16px !important; border-radius: 10px !important; width: 100% !important; touch-action: manipulation; }
     .stTextArea textarea { font-size: 16px !important; min-height: 100px !important; border-radius: 10px !important; }
     @media (max-width: 640px) {
@@ -148,7 +148,7 @@ for key, default in {
 # Custom title — single line on all screen sizes
 st.markdown("""
 <div class="custom-title" style="padding: 0.5rem 0 1rem 0;">
-    <div style="font-size: clamp(1.1rem, 5.5vw, 1.75rem); font-weight: 700; white-space: nowrap; letter-spacing: -0.3px; line-height: 1.2; color: inherit;">
+    <div style="font-size: clamp(0.95rem, 4.5vw, 1.5rem); font-weight: 700; white-space: nowrap; letter-spacing: -0.3px; line-height: 1.2; color: inherit;">
         🩺 Medical Voice Translator
     </div>
     <div style="font-size: 13px; color: #888; margin-top: 4px;">
