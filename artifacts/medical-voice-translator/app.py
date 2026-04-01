@@ -1,9 +1,5 @@
 """
 Medical Voice Translator - Fixed version
-- Auto-translates immediately after voice recording
-- Text area always translates current typed text
-- Audio plays automatically after translation
-- Medical phrases switch language based on direction
 """
 
 import io
@@ -62,13 +58,20 @@ def process_audio_input(audio, mic_lang_code):
         return None
 
 
-def do_translate(text, direction, tgt_lang_code):
-    """Translate text and generate audio, store results in session state."""
+def do_translate(text):
+    """
+    Translate text using current direction from session state.
+    Derives tgt_lang_code internally so it's always correct.
+    """
+    direction = st.session_state.direction
+    tgt_lang  = "es" if direction == "en->es" else "en"
     translated = translate_text(text, direction)
-    audio_b64  = generate_audio_b64(translated, tgt_lang_code)
+    audio_b64  = generate_audio_b64(translated, tgt_lang)
     st.session_state.translated = translated
-    st.session_state.tgt_lang   = tgt_lang_code
+    st.session_state.tgt_lang   = tgt_lang
+    # Use a unique key so the audio element re-renders fresh every time
     st.session_state.audio_b64  = audio_b64
+    st.session_state.audio_key  = hash(audio_b64)
 
 
 MEDICAL_PHRASES_EN = [
@@ -118,6 +121,7 @@ for key, default in {
     "tgt_lang": "es",
     "last_audio_id": None,
     "audio_b64": None,
+    "audio_key": 0,
     "input_text": "",
 }.items():
     if key not in st.session_state:
@@ -138,15 +142,20 @@ if en_to_es:
     st.session_state.direction  = "en->es"
     st.session_state.translated = ""
     st.session_state.audio_b64  = None
+    st.session_state.audio_key  = 0
+    st.session_state.input_text = ""
 if es_to_en:
     st.session_state.direction  = "es->en"
     st.session_state.translated = ""
     st.session_state.audio_b64  = None
+    st.session_state.audio_key  = 0
+    st.session_state.input_text = ""
 
-src_lang_label = "English" if st.session_state.direction == "en->es" else "Spanish"
-tgt_lang_label = "Spanish" if st.session_state.direction == "en->es" else "English"
-tgt_lang_code  = "es"      if st.session_state.direction == "en->es" else "en"
-mic_lang_code  = "en-US"   if st.session_state.direction == "en->es" else "es-ES"
+# Derive lang labels AFTER direction buttons are processed
+direction      = st.session_state.direction
+src_lang_label = "English" if direction == "en->es" else "Spanish"
+tgt_lang_label = "Spanish" if direction == "en->es" else "English"
+mic_lang_code  = "en-US"   if direction == "en->es" else "es-ES"
 
 st.info(f"**Mode:** {src_lang_label} → {tgt_lang_label}")
 
@@ -169,8 +178,7 @@ if VOICE_INPUT_AVAILABLE:
             if spoken:
                 st.session_state.input_text = spoken
                 with st.spinner("Translating..."):
-                    # ✅ Auto-translate immediately after transcription
-                    do_translate(spoken, st.session_state.direction, tgt_lang_code)
+                    do_translate(spoken)   # uses st.session_state.direction internally
                 st.success(f"✅ Heard: *{spoken}*")
 
 # ── Text input ───────────────────────────────────────────────────────────────
@@ -190,17 +198,18 @@ if st.button("🔄 Translate", type="primary", use_container_width=True):
     text_to_translate = st.session_state.input_text.strip()
     if text_to_translate:
         with st.spinner("Translating..."):
-            do_translate(text_to_translate, st.session_state.direction, tgt_lang_code)
+            do_translate(text_to_translate)
     else:
         st.warning("Please type or record some text before translating.")
 
-# ── Translation result + auto audio player ───────────────────────────────────
+# ── Translation result + audio player ────────────────────────────────────────
 st.subheader("Translation")
 if st.session_state.translated:
     st.success(st.session_state.translated)
     if st.session_state.audio_b64:
+        # audio_key changes every translation so the element re-renders fresh
         st.markdown(f"""
-        <div style="margin-top:8px;">
+        <div style="margin-top:8px;" id="audio-{st.session_state.audio_key}">
             <p style="font-size:13px; color:#666; margin-bottom:4px;">🔊 Translation Audio</p>
             <audio controls style="width:100%; border-radius:8px;">
                 <source src="data:audio/mp3;base64,{st.session_state.audio_b64}" type="audio/mp3">
@@ -213,7 +222,7 @@ st.divider()
 # ── Preset medical phrases ────────────────────────────────────────────────────
 st.subheader("⚕️ Common Medical Phrases")
 
-if st.session_state.direction == "en->es":
+if direction == "en->es":
     display_phrases = MEDICAL_PHRASES_EN
     source_phrases  = MEDICAL_PHRASES_EN
     st.caption("Tap a phrase to translate it to Spanish and hear the audio.")
@@ -225,7 +234,7 @@ else:
 for display_phrase, src_phrase in zip(display_phrases, source_phrases):
     if st.button(display_phrase, use_container_width=True):
         with st.spinner("Translating..."):
-            do_translate(src_phrase, st.session_state.direction, tgt_lang_code)
+            do_translate(src_phrase)
         st.session_state.input_text = src_phrase
         st.markdown(f"**Original:** {src_phrase}")
         st.success(f"**Translation:** {st.session_state.translated}")
