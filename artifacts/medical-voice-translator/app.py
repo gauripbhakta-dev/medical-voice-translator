@@ -1,5 +1,9 @@
 """
 Medical Voice Translator - Fixed version
+- Auto-translates immediately after voice recording
+- Text area always translates current typed text
+- Audio plays automatically after translation
+- Medical phrases switch language based on direction
 """
 
 import io
@@ -58,6 +62,15 @@ def process_audio_input(audio, mic_lang_code):
         return None
 
 
+def do_translate(text, direction, tgt_lang_code):
+    """Translate text and generate audio, store results in session state."""
+    translated = translate_text(text, direction)
+    audio_b64  = generate_audio_b64(translated, tgt_lang_code)
+    st.session_state.translated = translated
+    st.session_state.tgt_lang   = tgt_lang_code
+    st.session_state.audio_b64  = audio_b64
+
+
 MEDICAL_PHRASES_EN = [
     "Where is your pain?",
     "Do you have allergies?",
@@ -105,7 +118,7 @@ for key, default in {
     "tgt_lang": "es",
     "last_audio_id": None,
     "audio_b64": None,
-    "input_text": "",       # single source of truth for text input
+    "input_text": "",
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
@@ -142,7 +155,7 @@ if VOICE_INPUT_AVAILABLE:
     st.markdown("**🎙️ Voice Input**")
     st.markdown("""
     <div style="font-size:13px; color:#666; margin-bottom:8px;">
-        📱 <b>iPhone/Android:</b> Tap the microphone, speak, tap stop. Then tap Translate.
+        📱 <b>iPhone/Android:</b> Tap the microphone, speak, tap stop — translation happens automatically.
     </div>
     """, unsafe_allow_html=True)
 
@@ -154,13 +167,13 @@ if VOICE_INPUT_AVAILABLE:
             with st.spinner("Transcribing..."):
                 spoken = process_audio_input(audio, mic_lang_code)
             if spoken:
-                # Write to input_text (NOT the widget key) — safe at any point
                 st.session_state.input_text = spoken
+                with st.spinner("Translating..."):
+                    # ✅ Auto-translate immediately after transcription
+                    do_translate(spoken, st.session_state.direction, tgt_lang_code)
                 st.success(f"✅ Heard: *{spoken}*")
 
 # ── Text input ───────────────────────────────────────────────────────────────
-# Use value= to populate from session state (voice or preset phrase)
-# Read what user typed via the return value of st.text_area
 st.subheader("Enter Text")
 typed_text = st.text_area(
     f"Type in {src_lang_label}:",
@@ -169,7 +182,6 @@ typed_text = st.text_area(
     placeholder=f"Enter {src_lang_label} text here…",
     key="text_area_widget",
 )
-# Keep session state in sync with whatever is currently in the box
 st.session_state.input_text = typed_text
 
 # ── Translate button ─────────────────────────────────────────────────────────
@@ -178,11 +190,7 @@ if st.button("🔄 Translate", type="primary", use_container_width=True):
     text_to_translate = st.session_state.input_text.strip()
     if text_to_translate:
         with st.spinner("Translating..."):
-            translated = translate_text(text_to_translate, st.session_state.direction)
-            audio_b64  = generate_audio_b64(translated, tgt_lang_code)
-        st.session_state.translated = translated
-        st.session_state.tgt_lang   = tgt_lang_code
-        st.session_state.audio_b64  = audio_b64
+            do_translate(text_to_translate, st.session_state.direction, tgt_lang_code)
     else:
         st.warning("Please type or record some text before translating.")
 
@@ -217,17 +225,12 @@ else:
 for display_phrase, src_phrase in zip(display_phrases, source_phrases):
     if st.button(display_phrase, use_container_width=True):
         with st.spinner("Translating..."):
-            translated = translate_text(src_phrase, st.session_state.direction)
-            audio_b64  = generate_audio_b64(translated, tgt_lang_code)
-        # Safe: update input_text (not a widget key) before text_area renders next run
+            do_translate(src_phrase, st.session_state.direction, tgt_lang_code)
         st.session_state.input_text = src_phrase
-        st.session_state.translated = translated
-        st.session_state.tgt_lang   = tgt_lang_code
-        st.session_state.audio_b64  = audio_b64
         st.markdown(f"**Original:** {src_phrase}")
-        st.success(f"**Translation:** {translated}")
+        st.success(f"**Translation:** {st.session_state.translated}")
         st.markdown(f"""
         <audio controls style="width:100%; border-radius:8px; margin-top:8px;">
-            <source src="data:audio/mp3;base64,{audio_b64}" type="audio/mp3">
+            <source src="data:audio/mp3;base64,{st.session_state.audio_b64}" type="audio/mp3">
         </audio>
         """, unsafe_allow_html=True)
