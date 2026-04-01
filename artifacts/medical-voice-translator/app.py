@@ -7,6 +7,7 @@ import base64
 import tempfile
 import os
 import streamlit as st
+import streamlit.components.v1 as components
 from deep_translator import GoogleTranslator
 from gtts import gTTS
 
@@ -76,20 +77,20 @@ def do_translate(text):
 
 
 def render_audio(b64: str):
-    # Use audio/mpeg for iOS compatibility, mp3 as fallback for others
-    st.markdown(f"""
-    <div style="margin-top:8px;">
-        <p style="font-size:13px; color:#666; margin-bottom:6px;">🔊 Translation Audio</p>
+    # Use components.html() — always renders a fresh iframe, never cached by Streamlit
+    components.html(f"""
+    <div style="font-family: sans-serif; padding: 4px 0;">
+        <p style="font-size:13px; color:#666; margin: 0 0 6px 0;">🔊 Translation Audio</p>
         <audio controls preload="auto"
-               style="width:100%; min-height:40px; border-radius:8px; display:block;">
+               style="width:100%; border-radius:8px; display:block; min-height:40px;">
             <source src="data:audio/mpeg;base64,{b64}" type="audio/mpeg">
             <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
         </audio>
-        <p style="font-size:11px; color:#aaa; margin-top:4px;">
+        <p style="font-size:11px; color:#aaa; margin: 4px 0 0 0;">
             iPhone: tap the play button above to hear audio.
         </p>
     </div>
-    """, unsafe_allow_html=True)
+    """, height=90)
 
 
 MEDICAL_PHRASES_EN = [
