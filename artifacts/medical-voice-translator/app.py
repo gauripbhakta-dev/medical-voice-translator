@@ -1,5 +1,5 @@
 """
-Medical Voice Translator - Fixed version
+Medical Voice Translator - Redesigned layout
 """
 
 import io
@@ -77,29 +77,25 @@ def do_translate(text):
 
 
 def render_audio(b64: str):
-    # Use components.html() — always renders a fresh iframe, never cached by Streamlit
     components.html(f"""
-    <div style="font-family: sans-serif; padding: 4px 0;">
-        <p style="font-size:13px; color:#666; margin: 0 0 6px 0;">🔊 Translation Audio</p>
-        <audio controls preload="auto"
-               style="width:100%; border-radius:8px; display:block; min-height:40px;">
-            <source src="data:audio/mpeg;base64,{b64}" type="audio/mpeg">
-            <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
-        </audio>
-        <p style="font-size:11px; color:#aaa; margin: 4px 0 0 0;">
-            iPhone: tap the play button above to hear audio.
-        </p>
-    </div>
-    """, height=90)
+    <audio controls preload="auto"
+           style="width:100%; border-radius:8px; display:block; min-height:40px; margin-top:8px;">
+        <source src="data:audio/mpeg;base64,{b64}" type="audio/mpeg">
+        <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
+    </audio>
+    <p style="font-size:11px; color:#aaa; margin:4px 0 0 0; font-family:sans-serif;">
+        iPhone: tap the play button to hear the translation.
+    </p>
+    """, height=70)
 
 
 CATEGORY_LABELS = {
-    "🩹 Pain Assessment":        {"es": "🩹 Evaluación del dolor"},
-    "🤒 Symptoms":               {"es": "🤒 Síntomas"},
-    "💊 Medications & Allergies":{"es": "💊 Medicamentos y alergias"},
-    "📋 Medical History":        {"es": "📋 Historia médica"},
-    "✅ Consent & Instructions": {"es": "✅ Consentimiento e instrucciones"},
-    "🚨 Emergency":              {"es": "🚨 Emergencia"},
+    "🩹 Pain Assessment":         {"es": "🩹 Evaluación del dolor"},
+    "🤒 Symptoms":                {"es": "🤒 Síntomas"},
+    "💊 Medications & Allergies": {"es": "💊 Medicamentos y alergias"},
+    "📋 Medical History":         {"es": "📋 Historia médica"},
+    "✅ Consent & Instructions":  {"es": "✅ Consentimiento e instrucciones"},
+    "🚨 Emergency":               {"es": "🚨 Emergencia"},
 }
 
 MEDICAL_PHRASES = {
@@ -213,6 +209,49 @@ MEDICAL_PHRASES = {
     },
 }
 
+UI = {
+    "en->es": {
+        "dir_label":        "Translation Direction",
+        "btn1":             "🇺🇸 EN → ES",
+        "btn2":             "🇪🇸 ES → EN",
+        "mode":             "English → Spanish",
+        "voice_hint":       "📱 Tap the microphone, speak, tap stop — translation happens automatically.",
+        "voice_btn":        "🎙️ Record",
+        "text_label":       "Type in English:",
+        "text_placeholder": "Enter English text here…",
+        "translate_btn":    "🔄 Translate",
+        "translate_warn":   "Please type or record some text before translating.",
+        "input_section":    "Input",
+        "translation":      "Translation",
+        "phrases_title":    "⚕️ Quick Phrases",
+        "phrases_caption":  "Tap a phrase to translate it to Spanish and hear the audio.",
+        "heard":            "✅ Heard:",
+        "spinner_trans":    "Transcribing...",
+        "spinner_tl":       "Translating...",
+        "disclaimer":       "No data stored · For communication assistance only · Not a substitute for a certified medical interpreter",
+    },
+    "es->en": {
+        "dir_label":        "Dirección de traducción",
+        "btn1":             "🇺🇸 EN → ES",
+        "btn2":             "🇪🇸 ES → EN",
+        "mode":             "Español → Inglés",
+        "voice_hint":       "📱 Toque el micrófono, hable, toque detener — la traducción ocurre automáticamente.",
+        "voice_btn":        "🎙️ Grabar",
+        "text_label":       "Escriba en Español:",
+        "text_placeholder": "Ingrese texto en español aquí…",
+        "translate_btn":    "🔄 Traducir",
+        "translate_warn":   "Por favor escriba o grabe texto antes de traducir.",
+        "input_section":    "Entrada",
+        "translation":      "Traducción",
+        "phrases_title":    "⚕️ Frases rápidas",
+        "phrases_caption":  "Toca una frase para traducirla al inglés y escuchar el audio.",
+        "heard":            "✅ Escuché:",
+        "spinner_trans":    "Transcribiendo...",
+        "spinner_tl":       "Traduciendo...",
+        "disclaimer":       "Sin datos almacenados · Solo asistencia en comunicación · No sustituye a un intérprete médico certificado",
+    }
+}
+
 st.set_page_config(
     page_title="Medical Voice Translator",
     page_icon="🩺",
@@ -224,173 +263,126 @@ st.markdown("""
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <style>
     html, body, [class*="css"] { font-size: 16px !important; -webkit-text-size-adjust: 100%; }
-    .block-container { padding-left: 1rem !important; padding-right: 1rem !important; padding-top: 2.5rem !important; max-width: 100% !important; }
+    .block-container { padding-left: 1rem !important; padding-right: 1rem !important; padding-top: 2rem !important; max-width: 480px !important; }
     .stButton > button { min-height: 52px !important; font-size: 16px !important; border-radius: 10px !important; width: 100% !important; touch-action: manipulation; }
-    .stTextArea textarea { font-size: 16px !important; min-height: 100px !important; border-radius: 10px !important; }
-    @media (max-width: 640px) {
-        [data-testid="column"] { width: 100% !important; flex: 1 1 100% !important; min-width: 0 !important; }
-        .stButton > button { min-height: 56px !important; font-size: 17px !important; }
-    }
+    .stTextArea textarea { font-size: 16px !important; border-radius: 10px !important; }
     [data-testid="stAudioInput"] { width: 100% !important; }
-    .stAlert { border-radius: 10px !important; font-size: 16px !important; }
-    h1 { font-size: clamp(1rem, 4.8vw, 1.6rem) !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
-    h2, h3 { font-size: 1.2rem !important; }
+    .stAlert { border-radius: 10px !important; font-size: 15px !important; }
+    h1 { font-size: clamp(1rem, 4.8vw, 1.5rem) !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; margin-bottom: 0 !important; }
+    h2, h3 { font-size: 1rem !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; color: #888 !important; }
     audio { width: 100% !important; border-radius: 8px; display: block; }
+    .section-card { background: var(--background-color); border: 1px solid rgba(128,128,128,0.2); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; }
 </style>
 """, unsafe_allow_html=True)
 
 for key, default in {
-    "direction": "en->es",
-    "translated": "",
-    "tgt_lang": "es",
+    "direction":    "en->es",
+    "translated":   "",
+    "tgt_lang":     "es",
     "last_audio_id": None,
-    "audio_b64": None,
-    "input_text": "",
+    "audio_b64":    None,
+    "input_text":   "",
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
 
-# Custom title — single line on all screen sizes
-# ── UI strings (switch language based on direction) ──────────────────────────
-UI = {
-    "en->es": {
-        "dir_label": "Translation Direction",
-        "btn1": "🇺🇸 EN → ES",
-        "btn2": "🇪🇸 ES → EN",
-        "mode": "English → Spanish",
-        "voice_title": "**🎙️ Voice Input**",
-        "voice_hint": "📱 <b>iPhone/Android:</b> Tap the microphone, speak, tap stop — translation happens automatically.",
-        "voice_btn": "Tap to record",
-        "enter_text": "Enter Text",
-        "text_label": "Type in English:",
-        "text_placeholder": "Enter English text here…",
-        "translate_btn": "🔄 Translate",
-        "translate_warn": "Please type or record some text before translating.",
-        "translation": "Translation",
-        "audio_label": "🔊 Translation Audio",
-        "audio_hint": "iPhone: tap the play button above to hear audio.",
-        "phrases_title": "⚕️ Common Medical Phrases",
-        "phrases_caption": "Tap a phrase to translate it to Spanish and hear the audio.",
-        "heard": "✅ Heard:",
-        "original": "**Original:**",
-        "spinner_transcribe": "Transcribing...",
-        "spinner_translate": "Translating...",
-    },
-    "es->en": {
-        "dir_label": "Dirección de traducción",
-        "btn1": "🇺🇸 EN → ES",
-        "btn2": "🇪🇸 ES → EN",
-        "mode": "Español → Inglés",
-        "voice_title": "**🎙️ Entrada de voz**",
-        "voice_hint": "📱 <b>iPhone/Android:</b> Toque el micrófono, hable, toque detener — la traducción ocurre automáticamente.",
-        "voice_btn": "Toque para grabar",
-        "enter_text": "Ingresar texto",
-        "text_label": "Escriba en Español:",
-        "text_placeholder": "Ingrese texto en español aquí…",
-        "translate_btn": "🔄 Traducir",
-        "translate_warn": "Por favor escriba o grabe texto antes de traducir.",
-        "translation": "Traducción",
-        "audio_label": "🔊 Audio de traducción",
-        "audio_hint": "iPhone: toque el botón de reproducción para escuchar el audio.",
-        "phrases_title": "⚕️ Frases médicas comunes",
-        "phrases_caption": "Toca una frase para traducirla al inglés y escuchar el audio.",
-        "heard": "✅ Escuché:",
-        "original": "**Original:**",
-        "spinner_transcribe": "Transcribiendo...",
-        "spinner_translate": "Traduciendo...",
-    }
-}
-
-st.title("🩺 Medical Voice Translator")
-st.caption("Translate medical phrases between English and Spanish — with audio playback.")
-
-# ── Disclaimer ───────────────────────────────────────────────────────────────
-_disclaimer = (
-    "⚠️ <b>Important:</b> No data is stored or recorded. For communication assistance only. Not a substitute for a certified medical interpreter."
-    if st.session_state.direction == "en->es" else
-    "⚠️ <b>Importante:</b> No se almacenan ni graban datos. Solo para asistencia en la comunicación. No sustituye a un intérprete médico certificado."
-)
-st.markdown(f"""
-<div style="background:#fff8e1; border-left: 4px solid #f9a825; border-radius:8px; padding:10px 14px; margin-bottom:12px; font-size:13px; color:#555;">
-    {_disclaimer}
-</div>
-""", unsafe_allow_html=True)
-
-# ── Direction selector ───────────────────────────────────────────────────────
 direction = st.session_state.direction
 ui = UI[direction]
 mic_lang_code = "en-US" if direction == "en->es" else "es-ES"
+lang_key = "en" if direction == "en->es" else "es"
 
-st.subheader(ui["dir_label"])
+# ── Header ───────────────────────────────────────────────────────────────────
+st.title("🩺 Medical Voice Translator")
+st.markdown(f"""
+<p style="font-size:12px; color:#999; margin-top:2px; margin-bottom:16px;">
+    {ui['disclaimer']}
+</p>
+""", unsafe_allow_html=True)
+
+# ── Direction toggle ──────────────────────────────────────────────────────────
 col1, col2 = st.columns(2)
 with col1:
-    en_to_es = st.button(ui["btn1"], use_container_width=True)
+    if st.button(ui["btn1"], use_container_width=True,
+                 type="primary" if direction == "en->es" else "secondary"):
+        st.session_state.update({"direction":"en->es","translated":"","audio_b64":None,"input_text":""})
+        st.rerun()
 with col2:
-    es_to_en = st.button(ui["btn2"], use_container_width=True)
+    if st.button(ui["btn2"], use_container_width=True,
+                 type="primary" if direction == "es->en" else "secondary"):
+        st.session_state.update({"direction":"es->en","translated":"","audio_b64":None,"input_text":""})
+        st.rerun()
 
-if en_to_es:
-    st.session_state.update({"direction":"en->es","translated":"","audio_b64":None,"input_text":""})
-    st.rerun()
-if es_to_en:
-    st.session_state.update({"direction":"es->en","translated":"","audio_b64":None,"input_text":""})
-    st.rerun()
+st.markdown("<div style='margin-bottom:16px;'></div>", unsafe_allow_html=True)
 
-st.info(f"**{'Mode' if direction == 'en->es' else 'Modo'}:** {ui['mode']}")
+# ── INPUT SECTION ─────────────────────────────────────────────────────────────
+st.subheader(ui["input_section"])
 
-# ── Voice input ───────────────────────────────────────────────────────────────
-if VOICE_INPUT_AVAILABLE:
-    st.markdown(ui["voice_title"])
-    st.markdown(f"""
-    <div style="font-size:13px; color:#666; margin-bottom:8px;">
-        {ui["voice_hint"]}
-    </div>
-    """, unsafe_allow_html=True)
-
-    audio = st.audio_input(ui["voice_btn"], key="audio_recorder")
-    if audio is not None:
-        audio_id = hash(audio.getvalue())
-        if audio_id != st.session_state.last_audio_id:
-            st.session_state.last_audio_id = audio_id
-            with st.spinner(ui["spinner_transcribe"]):
-                spoken = process_audio_input(audio, mic_lang_code)
-            if spoken:
-                st.session_state.input_text = spoken
-                with st.spinner(ui["spinner_translate"]):
-                    do_translate(spoken)
-                st.success(f"{ui['heard']} *{spoken}*")
-
-# ── Text input ───────────────────────────────────────────────────────────────
-st.subheader(ui["enter_text"])
+# Text box
 typed_text = st.text_area(
     ui["text_label"],
     value=st.session_state.input_text,
-    height=120,
+    height=100,
     placeholder=ui["text_placeholder"],
     key="text_area_widget",
+    label_visibility="collapsed",
 )
 st.session_state.input_text = typed_text
 
-# ── Translate button ─────────────────────────────────────────────────────────
-st.markdown("<div style='margin-top:12px;'></div>", unsafe_allow_html=True)
-if st.button(ui["translate_btn"], type="primary", use_container_width=True):
+# Voice + Translate side by side
+if VOICE_INPUT_AVAILABLE:
+    st.markdown(f"""
+    <p style="font-size:12px; color:#999; margin: 6px 0 4px 0;">{ui['voice_hint']}</p>
+    """, unsafe_allow_html=True)
+
+    vcol, tcol = st.columns([1, 2])
+    with vcol:
+        audio = st.audio_input("", key="audio_recorder", label_visibility="collapsed")
+    with tcol:
+        translate_clicked = st.button(ui["translate_btn"], type="primary", use_container_width=True)
+else:
+    translate_clicked = st.button(ui["translate_btn"], type="primary", use_container_width=True)
+    audio = None
+
+# Handle voice
+if audio is not None:
+    audio_id = hash(audio.getvalue())
+    if audio_id != st.session_state.last_audio_id:
+        st.session_state.last_audio_id = audio_id
+        with st.spinner(ui["spinner_trans"]):
+            spoken = process_audio_input(audio, mic_lang_code)
+        if spoken:
+            st.session_state.input_text = spoken
+            with st.spinner(ui["spinner_tl"]):
+                do_translate(spoken)
+            st.success(f"{ui['heard']} *{spoken}*")
+
+# Handle translate button
+if translate_clicked:
     if st.session_state.input_text.strip():
-        with st.spinner(ui["spinner_translate"]):
+        with st.spinner(ui["spinner_tl"]):
             do_translate(st.session_state.input_text.strip())
     else:
         st.warning(ui["translate_warn"])
 
-# ── Translation result + audio ────────────────────────────────────────────────
+st.markdown("<div style='margin-bottom:4px;'></div>", unsafe_allow_html=True)
+
+# ── TRANSLATION + AUDIO (always together) ─────────────────────────────────────
 st.subheader(ui["translation"])
 if st.session_state.translated:
     st.success(st.session_state.translated)
-if st.session_state.audio_b64:
-    render_audio(st.session_state.audio_b64)
+    if st.session_state.audio_b64:
+        render_audio(st.session_state.audio_b64)
+else:
+    st.markdown(f"""
+    <p style="font-size:14px; color:#bbb; padding: 8px 0;">
+        {'Translation will appear here.' if direction == 'en->es' else 'La traducción aparecerá aquí.'}
+    </p>
+    """, unsafe_allow_html=True)
 
-st.divider()
+st.markdown("<div style='margin-bottom:4px;'></div>", unsafe_allow_html=True)
 
-# ── Preset medical phrases ────────────────────────────────────────────────────
+# ── QUICK PHRASES ─────────────────────────────────────────────────────────────
 st.subheader(ui["phrases_title"])
-lang_key = "en" if direction == "en->es" else "es"
 st.caption(ui["phrases_caption"])
 
 for category, langs in MEDICAL_PHRASES.items():
@@ -398,10 +390,9 @@ for category, langs in MEDICAL_PHRASES.items():
     with st.expander(label, expanded=False):
         for phrase in langs[lang_key]:
             if st.button(phrase, use_container_width=True, key=f"phrase_{phrase}"):
-                with st.spinner(ui["spinner_translate"]):
+                with st.spinner(ui["spinner_tl"]):
                     do_translate(phrase)
                 st.session_state.input_text = phrase
-                st.markdown(f"{ui['original']} {phrase}")
                 st.success(f"**{'Translation' if direction == 'en->es' else 'Traducción'}:** {st.session_state.translated}")
                 if st.session_state.audio_b64:
                     render_audio(st.session_state.audio_b64)
