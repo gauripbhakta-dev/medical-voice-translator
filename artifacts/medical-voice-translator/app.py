@@ -316,22 +316,18 @@ st.markdown("<div style='margin-bottom:12px;'></div>", unsafe_allow_html=True)
 # ── INPUT ZONE ────────────────────────────────────────────────────────────────
 st.subheader(ui["input_section"])
 
-# Text area + Translate button on same row
-tcol, bcol = st.columns([4, 1])
-with tcol:
-    typed_text = st.text_area(
-        ui["text_label"],
-        value=st.session_state.input_text,
-        height=100,
-        placeholder=ui["text_placeholder"],
-        key="text_area_widget",
-        label_visibility="collapsed",
-    )
-    st.session_state.input_text = typed_text
-with bcol:
-    # Spacer to vertically center button alongside text area
-    st.markdown("<div style='margin-top:28px;'></div>", unsafe_allow_html=True)
-    translate_clicked = st.button(ui["translate_btn"], type="primary", use_container_width=True)
+# Input zone — text area stacked above translate button
+# columns layout is unreliable on mobile so we stack them cleanly
+typed_text = st.text_area(
+    ui["text_label"],
+    value=st.session_state.input_text,
+    height=100,
+    placeholder=ui["text_placeholder"],
+    key="text_area_widget",
+    label_visibility="collapsed",
+)
+st.session_state.input_text = typed_text
+translate_clicked = st.button(ui["translate_btn"], type="primary", use_container_width=True)
 
 # Voice recorder
 if VOICE_INPUT_AVAILABLE:
