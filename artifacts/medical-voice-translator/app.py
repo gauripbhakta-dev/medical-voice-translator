@@ -242,80 +242,136 @@ for key, default in {
         st.session_state[key] = default
 
 # Custom title — single line on all screen sizes
+# ── UI strings (switch language based on direction) ──────────────────────────
+UI = {
+    "en->es": {
+        "dir_label": "Translation Direction",
+        "btn1": "🇺🇸 EN → ES",
+        "btn2": "🇪🇸 ES → EN",
+        "mode": "English → Spanish",
+        "voice_title": "**🎙️ Voice Input**",
+        "voice_hint": "📱 <b>iPhone/Android:</b> Tap the microphone, speak, tap stop — translation happens automatically.",
+        "voice_btn": "Tap to record",
+        "enter_text": "Enter Text",
+        "text_label": "Type in English:",
+        "text_placeholder": "Enter English text here…",
+        "translate_btn": "🔄 Translate",
+        "translate_warn": "Please type or record some text before translating.",
+        "translation": "Translation",
+        "audio_label": "🔊 Translation Audio",
+        "audio_hint": "iPhone: tap the play button above to hear audio.",
+        "phrases_title": "⚕️ Common Medical Phrases",
+        "phrases_caption": "Tap a phrase to translate it to Spanish and hear the audio.",
+        "heard": "✅ Heard:",
+        "original": "**Original:**",
+        "spinner_transcribe": "Transcribing...",
+        "spinner_translate": "Translating...",
+    },
+    "es->en": {
+        "dir_label": "Dirección de traducción",
+        "btn1": "🇺🇸 EN → ES",
+        "btn2": "🇪🇸 ES → EN",
+        "mode": "Español → Inglés",
+        "voice_title": "**🎙️ Entrada de voz**",
+        "voice_hint": "📱 <b>iPhone/Android:</b> Toque el micrófono, hable, toque detener — la traducción ocurre automáticamente.",
+        "voice_btn": "Toque para grabar",
+        "enter_text": "Ingresar texto",
+        "text_label": "Escriba en Español:",
+        "text_placeholder": "Ingrese texto en español aquí…",
+        "translate_btn": "🔄 Traducir",
+        "translate_warn": "Por favor escriba o grabe texto antes de traducir.",
+        "translation": "Traducción",
+        "audio_label": "🔊 Audio de traducción",
+        "audio_hint": "iPhone: toque el botón de reproducción para escuchar el audio.",
+        "phrases_title": "⚕️ Frases médicas comunes",
+        "phrases_caption": "Toca una frase para traducirla al inglés y escuchar el audio.",
+        "heard": "✅ Escuché:",
+        "original": "**Original:**",
+        "spinner_transcribe": "Transcribiendo...",
+        "spinner_translate": "Traduciendo...",
+    }
+}
+
 st.title("🩺 Medical Voice Translator")
 st.caption("Translate medical phrases between English and Spanish — with audio playback.")
 
 # ── Disclaimer ───────────────────────────────────────────────────────────────
-st.markdown("""
+_disclaimer = (
+    "⚠️ <b>Important:</b> No data is stored or recorded. For communication assistance only. Not a substitute for a certified medical interpreter."
+    if st.session_state.direction == "en->es" else
+    "⚠️ <b>Importante:</b> No se almacenan ni graban datos. Solo para asistencia en la comunicación. No sustituye a un intérprete médico certificado."
+)
+st.markdown(f"""
 <div style="background:#fff8e1; border-left: 4px solid #f9a825; border-radius:8px; padding:10px 14px; margin-bottom:12px; font-size:13px; color:#555;">
-    ⚠️ <b>Important:</b> No data is stored or recorded. For communication assistance only.
-    Not a substitute for a certified medical interpreter.
+    {_disclaimer}
 </div>
 """, unsafe_allow_html=True)
 
 # ── Direction selector ───────────────────────────────────────────────────────
-st.subheader("Translation Direction")
+direction = st.session_state.direction
+ui = UI[direction]
+mic_lang_code = "en-US" if direction == "en->es" else "es-ES"
+
+st.subheader(ui["dir_label"])
 col1, col2 = st.columns(2)
 with col1:
-    en_to_es = st.button("🇺🇸 EN → ES", use_container_width=True)
+    en_to_es = st.button(ui["btn1"], use_container_width=True)
 with col2:
-    es_to_en = st.button("🇪🇸 ES → EN", use_container_width=True)
+    es_to_en = st.button(ui["btn2"], use_container_width=True)
 
 if en_to_es:
     st.session_state.update({"direction":"en->es","translated":"","audio_b64":None,"input_text":""})
+    st.rerun()
 if es_to_en:
     st.session_state.update({"direction":"es->en","translated":"","audio_b64":None,"input_text":""})
+    st.rerun()
 
-direction      = st.session_state.direction
-src_lang_label = "English" if direction == "en->es" else "Spanish"
-mic_lang_code  = "en-US"   if direction == "en->es" else "es-ES"
-
-st.info(f"**Mode:** {'English → Spanish' if direction == 'en->es' else 'Spanish → English'}")
+st.info(f"**{'Mode' if direction == 'en->es' else 'Modo'}:** {ui['mode']}")
 
 # ── Voice input ───────────────────────────────────────────────────────────────
 if VOICE_INPUT_AVAILABLE:
-    st.markdown("**🎙️ Voice Input**")
-    st.markdown("""
+    st.markdown(ui["voice_title"])
+    st.markdown(f"""
     <div style="font-size:13px; color:#666; margin-bottom:8px;">
-        📱 <b>iPhone/Android:</b> Tap the microphone, speak, tap stop — translation happens automatically.
+        {ui["voice_hint"]}
     </div>
     """, unsafe_allow_html=True)
 
-    audio = st.audio_input("Tap to record", key="audio_recorder")
+    audio = st.audio_input(ui["voice_btn"], key="audio_recorder")
     if audio is not None:
         audio_id = hash(audio.getvalue())
         if audio_id != st.session_state.last_audio_id:
             st.session_state.last_audio_id = audio_id
-            with st.spinner("Transcribing..."):
+            with st.spinner(ui["spinner_transcribe"]):
                 spoken = process_audio_input(audio, mic_lang_code)
             if spoken:
                 st.session_state.input_text = spoken
-                with st.spinner("Translating..."):
+                with st.spinner(ui["spinner_translate"]):
                     do_translate(spoken)
-                st.success(f"✅ Heard: *{spoken}*")
+                st.success(f"{ui['heard']} *{spoken}*")
 
 # ── Text input ───────────────────────────────────────────────────────────────
-st.subheader("Enter Text")
+st.subheader(ui["enter_text"])
 typed_text = st.text_area(
-    f"Type in {src_lang_label}:",
+    ui["text_label"],
     value=st.session_state.input_text,
     height=120,
-    placeholder=f"Enter {src_lang_label} text here…",
+    placeholder=ui["text_placeholder"],
     key="text_area_widget",
 )
 st.session_state.input_text = typed_text
 
 # ── Translate button ─────────────────────────────────────────────────────────
 st.markdown("<div style='margin-top:12px;'></div>", unsafe_allow_html=True)
-if st.button("🔄 Translate", type="primary", use_container_width=True):
+if st.button(ui["translate_btn"], type="primary", use_container_width=True):
     if st.session_state.input_text.strip():
-        with st.spinner("Translating..."):
+        with st.spinner(ui["spinner_translate"]):
             do_translate(st.session_state.input_text.strip())
     else:
-        st.warning("Please type or record some text before translating.")
+        st.warning(ui["translate_warn"])
 
 # ── Translation result + audio ────────────────────────────────────────────────
-st.subheader("Translation")
+st.subheader(ui["translation"])
 if st.session_state.translated:
     st.success(st.session_state.translated)
 if st.session_state.audio_b64:
@@ -324,20 +380,18 @@ if st.session_state.audio_b64:
 st.divider()
 
 # ── Preset medical phrases ────────────────────────────────────────────────────
-st.subheader("⚕️ Common Medical Phrases")
-
+st.subheader(ui["phrases_title"])
 lang_key = "en" if direction == "en->es" else "es"
-caption = "Tap a phrase to translate it to Spanish and hear the audio." if direction == "en->es" else "Toca una frase para traducirla al inglés y escuchar el audio."
-st.caption(caption)
+st.caption(ui["phrases_caption"])
 
 for category, langs in MEDICAL_PHRASES.items():
     with st.expander(category, expanded=False):
         for phrase in langs[lang_key]:
             if st.button(phrase, use_container_width=True, key=f"phrase_{phrase}"):
-                with st.spinner("Translating..."):
+                with st.spinner(ui["spinner_translate"]):
                     do_translate(phrase)
                 st.session_state.input_text = phrase
-                st.markdown(f"**Original:** {phrase}")
-                st.success(f"**Translation:** {st.session_state.translated}")
+                st.markdown(f"{ui['original']} {phrase}")
+                st.success(f"**{'Translation' if direction == 'en->es' else 'Traducción'}:** {st.session_state.translated}")
                 if st.session_state.audio_b64:
                     render_audio(st.session_state.audio_b64)
