@@ -93,19 +93,116 @@ def render_audio(b64: str):
     """, height=90)
 
 
-MEDICAL_PHRASES_EN = [
-    "Where is your pain?",
-    "Do you have allergies?",
-    "Rate your pain from 1 to 10",
-    "Are you taking any medication?",
-]
-
-MEDICAL_PHRASES_ES = [
-    "¿Dónde le duele?",
-    "¿Tiene alergias?",
-    "Califique su dolor del 1 al 10",
-    "¿Está tomando algún medicamento?",
-]
+MEDICAL_PHRASES = {
+    "🩹 Pain Assessment": {
+        "en": [
+            "Where is your pain?",
+            "Rate your pain from 1 to 10",
+            "Is the pain sharp or dull?",
+            "Is the pain constant or does it come and go?",
+            "When did the pain start?",
+            "Does anything make the pain better or worse?",
+        ],
+        "es": [
+            "¿Dónde le duele?",
+            "Califique su dolor del 1 al 10",
+            "¿El dolor es agudo o sordo?",
+            "¿El dolor es constante o va y viene?",
+            "¿Cuándo empezó el dolor?",
+            "¿Hay algo que mejore o empeore el dolor?",
+        ]
+    },
+    "🤒 Symptoms": {
+        "en": [
+            "Do you have a fever?",
+            "Are you having trouble breathing?",
+            "Do you feel dizzy or lightheaded?",
+            "Do you have nausea or vomiting?",
+            "Do you have chest pain?",
+            "Have you fainted or lost consciousness?",
+        ],
+        "es": [
+            "¿Tiene fiebre?",
+            "¿Tiene dificultad para respirar?",
+            "¿Se siente mareado o con la cabeza liviana?",
+            "¿Tiene náuseas o vómitos?",
+            "¿Tiene dolor en el pecho?",
+            "¿Se ha desmayado o perdido el conocimiento?",
+        ]
+    },
+    "💊 Medications & Allergies": {
+        "en": [
+            "Do you have any allergies?",
+            "Are you allergic to any medications?",
+            "Are you currently taking any medications?",
+            "Do you take blood thinners?",
+            "Are you allergic to penicillin?",
+            "Do you have a list of your medications?",
+        ],
+        "es": [
+            "¿Tiene alguna alergia?",
+            "¿Es alérgico a algún medicamento?",
+            "¿Está tomando algún medicamento actualmente?",
+            "¿Toma anticoagulantes?",
+            "¿Es alérgico a la penicilina?",
+            "¿Tiene una lista de sus medicamentos?",
+        ]
+    },
+    "📋 Medical History": {
+        "en": [
+            "Do you have diabetes?",
+            "Do you have high blood pressure?",
+            "Have you had surgery before?",
+            "Do you have any heart conditions?",
+            "Are you pregnant?",
+            "Do you smoke or drink alcohol?",
+        ],
+        "es": [
+            "¿Tiene diabetes?",
+            "¿Tiene presión arterial alta?",
+            "¿Ha tenido cirugías antes?",
+            "¿Tiene alguna condición del corazón?",
+            "¿Está embarazada?",
+            "¿Fuma o consume alcohol?",
+        ]
+    },
+    "✅ Consent & Instructions": {
+        "en": [
+            "I need to examine you.",
+            "Please sign this form.",
+            "Do you understand?",
+            "Do you have any questions?",
+            "We need to take a blood sample.",
+            "Please take this medication twice a day.",
+        ],
+        "es": [
+            "Necesito examinarlo/a.",
+            "Por favor firme este formulario.",
+            "¿Entiende?",
+            "¿Tiene alguna pregunta?",
+            "Necesitamos tomar una muestra de sangre.",
+            "Por favor tome este medicamento dos veces al día.",
+        ]
+    },
+    "🚨 Emergency": {
+        "en": [
+            "Call 911 immediately.",
+            "Stay calm, help is coming.",
+            "Do not move.",
+            "Are you having a heart attack?",
+            "I am going to help you.",
+            "Is there someone I can call for you?",
+        ],
+        "es": [
+            "Llame al 911 inmediatamente.",
+            "Cálmese, la ayuda está en camino.",
+            "No se mueva.",
+            "¿Está teniendo un ataque al corazón?",
+            "Le voy a ayudar.",
+            "¿Hay alguien a quien pueda llamar por usted?",
+        ]
+    },
+}
 
 st.set_page_config(
     page_title="Medical Voice Translator",
@@ -127,9 +224,8 @@ st.markdown("""
     }
     [data-testid="stAudioInput"] { width: 100% !important; }
     .stAlert { border-radius: 10px !important; font-size: 16px !important; }
-    [data-testid="stHeadingWithActionElements"] { display: none !important; }
+    h1 { font-size: clamp(1rem, 4.8vw, 1.6rem) !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
     h2, h3 { font-size: 1.2rem !important; }
-    .custom-title { animation: none !important; opacity: 1 !important; }
     audio { width: 100% !important; border-radius: 8px; display: block; }
 </style>
 """, unsafe_allow_html=True)
@@ -146,14 +242,14 @@ for key, default in {
         st.session_state[key] = default
 
 # Custom title — single line on all screen sizes
+st.title("🩺 Medical Voice Translator")
+st.caption("Translate medical phrases between English and Spanish — with audio playback.")
+
+# ── Disclaimer ───────────────────────────────────────────────────────────────
 st.markdown("""
-<div class="custom-title" style="padding: 0.5rem 0 1rem 0;">
-    <div style="font-size: clamp(0.95rem, 4.5vw, 1.5rem); font-weight: 700; white-space: nowrap; letter-spacing: -0.3px; line-height: 1.2; color: inherit;">
-        🩺 Medical Voice Translator
-    </div>
-    <div style="font-size: 13px; color: #888; margin-top: 4px;">
-        Translate medical phrases between English and Spanish — with audio playback.
-    </div>
+<div style="background:#fff8e1; border-left: 4px solid #f9a825; border-radius:8px; padding:10px 14px; margin-bottom:12px; font-size:13px; color:#555;">
+    ⚠️ <b>Important:</b> No data is stored or recorded. For communication assistance only.
+    Not a substitute for a certified medical interpreter.
 </div>
 """, unsafe_allow_html=True)
 
@@ -230,19 +326,18 @@ st.divider()
 # ── Preset medical phrases ────────────────────────────────────────────────────
 st.subheader("⚕️ Common Medical Phrases")
 
-if direction == "en->es":
-    phrases = MEDICAL_PHRASES_EN
-    st.caption("Tap a phrase to translate it to Spanish and hear the audio.")
-else:
-    phrases = MEDICAL_PHRASES_ES
-    st.caption("Toca una frase para traducirla al inglés y escuchar el audio.")
+lang_key = "en" if direction == "en->es" else "es"
+caption = "Tap a phrase to translate it to Spanish and hear the audio." if direction == "en->es" else "Toca una frase para traducirla al inglés y escuchar el audio."
+st.caption(caption)
 
-for phrase in phrases:
-    if st.button(phrase, use_container_width=True):
-        with st.spinner("Translating..."):
-            do_translate(phrase)
-        st.session_state.input_text = phrase
-        st.markdown(f"**Original:** {phrase}")
-        st.success(f"**Translation:** {st.session_state.translated}")
-        if st.session_state.audio_b64:
-            render_audio(st.session_state.audio_b64)
+for category, langs in MEDICAL_PHRASES.items():
+    with st.expander(category, expanded=False):
+        for phrase in langs[lang_key]:
+            if st.button(phrase, use_container_width=True, key=f"phrase_{phrase}"):
+                with st.spinner("Translating..."):
+                    do_translate(phrase)
+                st.session_state.input_text = phrase
+                st.markdown(f"**Original:** {phrase}")
+                st.success(f"**Translation:** {st.session_state.translated}")
+                if st.session_state.audio_b64:
+                    render_audio(st.session_state.audio_b64)
