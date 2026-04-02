@@ -259,21 +259,37 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Google Analytics — injected via components.html for reliable script execution
+# Google Analytics — inject into parent page via postMessage workaround
 components.html("""
-<!DOCTYPE html>
-<html>
-<head>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-PM770KN3NX"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-PM770KN3NX');
+(function() {
+    // Send gtag script to parent window to bypass iframe sandbox
+    var script1 = document.createElement('script');
+    script1.async = true;
+    script1.src = 'https://www.googletagmanager.com/gtag/js?id=G-PM770KN3NX';
+    
+    var script2 = document.createElement('script');
+    script2.innerHTML = `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-PM770KN3NX', {
+            'page_title': 'Medical Voice Translator',
+            'page_location': window.location.href
+        });
+    `;
+    
+    // Try appending to parent document
+    try {
+        window.parent.document.head.appendChild(script1);
+        window.parent.document.head.appendChild(script2);
+    } catch(e) {
+        // Fallback: append to current iframe
+        document.head.appendChild(script1);
+        document.head.appendChild(script2);
+    }
+})();
 </script>
-</head>
-<body></body>
-</html>
 """, height=0)
 
 st.markdown("""
