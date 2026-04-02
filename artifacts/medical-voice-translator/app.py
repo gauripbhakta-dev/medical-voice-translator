@@ -259,6 +259,18 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# Google Analytics
+st.markdown("""
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PM770KN3NX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PM770KN3NX');
+</script>
+""", unsafe_allow_html=True)
+
 st.markdown("""
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <style>
