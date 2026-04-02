@@ -328,19 +328,24 @@ typed_text = st.text_area(
 )
 st.session_state.input_text = typed_text
 
-# Voice + Translate side by side
+# Voice hint
 if VOICE_INPUT_AVAILABLE:
     st.markdown(f"""
-    <p style="font-size:12px; color:#999; margin: 6px 0 4px 0;">{ui['voice_hint']}</p>
+    <p style="font-size:12px; color:#999; margin: 6px 0 8px 0;">{ui['voice_hint']}</p>
     """, unsafe_allow_html=True)
 
-    vcol, tcol = st.columns([1, 2])
-    with vcol:
-        audio = st.audio_input("", key="audio_recorder", label_visibility="collapsed")
-    with tcol:
-        translate_clicked = st.button(ui["translate_btn"], type="primary", use_container_width=True)
+# Translate button full width
+translate_clicked = st.button(ui["translate_btn"], type="primary", use_container_width=True)
+
+# Voice recorder below translate button — full width, clearly labeled
+if VOICE_INPUT_AVAILABLE:
+    st.markdown("""
+    <p style="font-size:12px; color:#888; text-align:center; margin: 8px 0 4px 0;">
+        — or record your voice —
+    </p>
+    """, unsafe_allow_html=True)
+    audio = st.audio_input("", key="audio_recorder", label_visibility="collapsed")
 else:
-    translate_clicked = st.button(ui["translate_btn"], type="primary", use_container_width=True)
     audio = None
 
 # Handle voice
