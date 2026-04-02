@@ -217,7 +217,7 @@ UI = {
         "voice_btn":        "Tap to record",
         "text_label":       "Type in English:",
         "text_placeholder": "Enter English text here…",
-        "translate_btn":    "🔄",
+        "translate_btn":    "🔄 Translate",
         "translate_warn":   "Please type or record some text before translating.",
         "input_section":    "Input",
         "translation":      "Translation",
@@ -237,7 +237,7 @@ UI = {
         "voice_btn":        "Toque para grabar",
         "text_label":       "Escriba en Español:",
         "text_placeholder": "Ingrese texto en español aquí…",
-        "translate_btn":    "🔄",
+        "translate_btn":    "🔄 Traducir",
         "translate_warn":   "Por favor escriba o grabe texto antes de traducir.",
         "input_section":    "Entrada",
         "translation":      "Traducción",
@@ -326,29 +326,7 @@ typed_text = st.text_area(
     label_visibility="collapsed",
 )
 st.session_state.input_text = typed_text
-
-# Small centered translate button tight below text area
-st.markdown("""
-<style>
-    div[data-testid="stTextArea"] { margin-bottom: 2px !important; }
-    div[data-testid="stBaseButton-primary"] {
-        display: flex !important;
-        justify-content: center !important;
-        margin-top: 2px !important;
-        margin-bottom: 4px !important;
-    }
-    div[data-testid="stBaseButton-primary"] button {
-        width: auto !important;
-        min-width: 120px !important;
-        max-width: 160px !important;
-        min-height: 36px !important;
-        font-size: 14px !important;
-        padding: 4px 20px !important;
-        border-radius: 20px !important;
-    }
-</style>
-""", unsafe_allow_html=True)
-translate_clicked = st.button(ui["translate_btn"], type="primary")
+translate_clicked = st.button(ui["translate_btn"], type="primary", use_container_width=True)
 
 # Voice recorder
 if VOICE_INPUT_AVAILABLE:
