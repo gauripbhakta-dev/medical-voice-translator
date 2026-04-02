@@ -392,3 +392,15 @@ for category, langs in MEDICAL_PHRASES.items():
                 st.success(f"**{ui['tl_label']}:** {st.session_state.translated}")
                 if st.session_state.audio_b64:
                     render_audio(st.session_state.audio_b64)
+
+# ── About ─────────────────────────────────────────────────────────────────────
+st.divider()
+st.markdown("""
+<div style="text-align:center; padding: 8px 0 4px 0;">
+    <p style="font-size:12px; color:#aaa; margin:0; line-height:1.8;">
+        Built by <b style="color:#888;">Gauri Bhakta</b>, Grade 10, Phillips Academy Andover<br>
+        Inspired by real patient communication challenges observed<br>
+        while volunteering in a hospital emergency department
+    </p>
+</div>
+""", unsafe_allow_html=True)
