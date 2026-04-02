@@ -217,7 +217,7 @@ UI = {
         "voice_btn":        "Tap to record",
         "text_label":       "Type in English:",
         "text_placeholder": "Enter English text here…",
-        "translate_btn":    "🔄 Translate",
+        "translate_btn":    "🔄",
         "translate_warn":   "Please type or record some text before translating.",
         "input_section":    "Input",
         "translation":      "Translation",
@@ -237,7 +237,7 @@ UI = {
         "voice_btn":        "Toque para grabar",
         "text_label":       "Escriba en Español:",
         "text_placeholder": "Ingrese texto en español aquí…",
-        "translate_btn":    "🔄 Traducir",
+        "translate_btn":    "🔄",
         "translate_warn":   "Por favor escriba o grabe texto antes de traducir.",
         "input_section":    "Entrada",
         "translation":      "Traducción",
@@ -316,15 +316,22 @@ st.markdown("<div style='margin-bottom:12px;'></div>", unsafe_allow_html=True)
 # ── INPUT ZONE ────────────────────────────────────────────────────────────────
 st.subheader(ui["input_section"])
 
-typed_text = st.text_area(
-    ui["text_label"],
-    value=st.session_state.input_text,
-    height=100,
-    placeholder=ui["text_placeholder"],
-    key="text_area_widget",
-    label_visibility="collapsed",
-)
-st.session_state.input_text = typed_text
+# Text area + Translate button on same row
+tcol, bcol = st.columns([4, 1])
+with tcol:
+    typed_text = st.text_area(
+        ui["text_label"],
+        value=st.session_state.input_text,
+        height=100,
+        placeholder=ui["text_placeholder"],
+        key="text_area_widget",
+        label_visibility="collapsed",
+    )
+    st.session_state.input_text = typed_text
+with bcol:
+    # Spacer to vertically center button alongside text area
+    st.markdown("<div style='margin-top:28px;'></div>", unsafe_allow_html=True)
+    translate_clicked = st.button(ui["translate_btn"], type="primary", use_container_width=True)
 
 # Voice recorder
 if VOICE_INPUT_AVAILABLE:
@@ -334,10 +341,6 @@ if VOICE_INPUT_AVAILABLE:
     audio = st.audio_input(ui["voice_btn"], key="audio_recorder")
 else:
     audio = None
-
-# Translate button
-st.markdown("<div style='margin-top:8px;'></div>", unsafe_allow_html=True)
-translate_clicked = st.button(ui["translate_btn"], type="primary", use_container_width=True)
 
 # Handle voice recording
 if audio is not None:
