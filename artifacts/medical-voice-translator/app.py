@@ -93,6 +93,15 @@ def render_audio(b64: str):
     """, height=90)
 
 
+CATEGORY_LABELS = {
+    "🩹 Pain Assessment":        {"es": "🩹 Evaluación del dolor"},
+    "🤒 Symptoms":               {"es": "🤒 Síntomas"},
+    "💊 Medications & Allergies":{"es": "💊 Medicamentos y alergias"},
+    "📋 Medical History":        {"es": "📋 Historia médica"},
+    "✅ Consent & Instructions": {"es": "✅ Consentimiento e instrucciones"},
+    "🚨 Emergency":              {"es": "🚨 Emergencia"},
+}
+
 MEDICAL_PHRASES = {
     "🩹 Pain Assessment": {
         "en": [
@@ -385,7 +394,8 @@ lang_key = "en" if direction == "en->es" else "es"
 st.caption(ui["phrases_caption"])
 
 for category, langs in MEDICAL_PHRASES.items():
-    with st.expander(category, expanded=False):
+    label = CATEGORY_LABELS[category]["es"] if direction == "es->en" else category
+    with st.expander(label, expanded=False):
         for phrase in langs[lang_key]:
             if st.button(phrase, use_container_width=True, key=f"phrase_{phrase}"):
                 with st.spinner(ui["spinner_translate"]):
