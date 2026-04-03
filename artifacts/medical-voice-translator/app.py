@@ -303,6 +303,15 @@ st.markdown("""
     .stAlert { border-radius: 10px !important; font-size: 15px !important; }
     h1 { font-size: clamp(1rem, 4.8vw, 1.5rem) !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; margin-bottom: 0 !important; }
     h2, h3 { font-size: 0.85rem !important; text-transform: uppercase !important; letter-spacing: 0.6px !important; color: #999 !important; margin-bottom: 8px !important; }
+    .stButton > button[kind="secondary"], div[data-testid="stExpander"] .stButton > button {
+        background-color: #E6F1FB !important;
+        color: #0C447C !important;
+        border: 1px solid #B5D4F4 !important;
+    }
+    .stButton > button[kind="secondary"]:hover, div[data-testid="stExpander"] .stButton > button:hover {
+        background-color: #B5D4F4 !important;
+        color: #0C447C !important;
+    }
     audio { width: 100% !important; border-radius: 8px; display: block; }
 </style>
 """, unsafe_allow_html=True)
@@ -412,20 +421,11 @@ st.markdown("<div style='margin-bottom:4px;'></div>", unsafe_allow_html=True)
 st.subheader(ui["phrases_title"])
 st.caption(ui["phrases_caption"])
 
-# Track which expander is open to prevent it collapsing on button click
-if "open_category" not in st.session_state:
-    st.session_state.open_category = None
-
 for category, langs in MEDICAL_PHRASES.items():
     label = CATEGORY_LABELS[category]["es"] if direction == "es->en" else category
-    is_open = st.session_state.open_category == category
-    with st.expander(label, expanded=is_open):
-        # Detect if user opened this expander
-        if not is_open:
-            st.session_state.open_category = category
+    with st.expander(label, expanded=False):
         for phrase in langs[lang_key]:
             if st.button(phrase, use_container_width=True, key=f"phrase_{phrase}"):
-                st.session_state.open_category = category  # keep expander open
                 with st.spinner(ui["spinner_tl"]):
                     do_translate(phrase)
                 st.session_state.input_text = phrase
