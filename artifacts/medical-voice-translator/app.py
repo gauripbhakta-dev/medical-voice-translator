@@ -412,11 +412,20 @@ st.markdown("<div style='margin-bottom:4px;'></div>", unsafe_allow_html=True)
 st.subheader(ui["phrases_title"])
 st.caption(ui["phrases_caption"])
 
+# Track which expander is open to prevent it collapsing on button click
+if "open_category" not in st.session_state:
+    st.session_state.open_category = None
+
 for category, langs in MEDICAL_PHRASES.items():
     label = CATEGORY_LABELS[category]["es"] if direction == "es->en" else category
-    with st.expander(label, expanded=False):
+    is_open = st.session_state.open_category == category
+    with st.expander(label, expanded=is_open):
+        # Detect if user opened this expander
+        if not is_open:
+            st.session_state.open_category = category
         for phrase in langs[lang_key]:
             if st.button(phrase, use_container_width=True, key=f"phrase_{phrase}"):
+                st.session_state.open_category = category  # keep expander open
                 with st.spinner(ui["spinner_tl"]):
                     do_translate(phrase)
                 st.session_state.input_text = phrase
