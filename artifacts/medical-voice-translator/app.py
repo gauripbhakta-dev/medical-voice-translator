@@ -385,11 +385,13 @@ translate_clicked = st.button(ui["translate_btn"], type="primary", use_container
 
 # Voice recorder
 if VOICE_INPUT_AVAILABLE:
+    # Voice recorder title switches language with UI
+    voice_title = "🎙️ Record Voice Input" if direction == "en->es" else "🎙️ Grabar entrada de voz"
     st.markdown(f"""
     <div style="background:#EBF3FB; border:1.5px dashed #2E75B6; border-radius:10px;
                 padding:10px 14px; margin: 8px 0 4px 0; text-align:center;">
         <div style="font-size:15px; font-weight:600; color:#1F4E79; margin-bottom:2px;">
-            🎙️ Record Voice Input
+            {voice_title}
         </div>
         <div style="font-size:11px; color:#2E75B6;">
             {ui['voice_hint']}
