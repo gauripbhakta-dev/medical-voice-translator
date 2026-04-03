@@ -386,9 +386,17 @@ translate_clicked = st.button(ui["translate_btn"], type="primary", use_container
 # Voice recorder
 if VOICE_INPUT_AVAILABLE:
     st.markdown(f"""
-    <p style="font-size:12px; color:#999; margin: 6px 0 4px 0;">{ui['voice_hint']}</p>
+    <div style="background:#EBF3FB; border:1.5px dashed #2E75B6; border-radius:10px;
+                padding:10px 14px; margin: 8px 0 4px 0; text-align:center;">
+        <div style="font-size:15px; font-weight:600; color:#1F4E79; margin-bottom:2px;">
+            🎙️ Record Voice Input
+        </div>
+        <div style="font-size:11px; color:#2E75B6;">
+            {ui['voice_hint']}
+        </div>
+    </div>
     """, unsafe_allow_html=True)
-    audio = st.audio_input(ui["voice_btn"], key="audio_recorder")
+    audio = st.audio_input("", key="audio_recorder", label_visibility="collapsed")
 else:
     audio = None
 
