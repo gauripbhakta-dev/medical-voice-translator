@@ -303,14 +303,14 @@ st.markdown("""
     .stAlert { border-radius: 10px !important; font-size: 15px !important; }
     h1 { font-size: clamp(1rem, 4.8vw, 1.5rem) !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; margin-bottom: 0 !important; }
     h2, h3 { font-size: 0.85rem !important; text-transform: uppercase !important; letter-spacing: 0.6px !important; color: #999 !important; margin-bottom: 8px !important; }
-    .stButton > button[kind="secondary"], div[data-testid="stExpander"] .stButton > button {
-        background-color: #E6F1FB !important;
-        color: #0C447C !important;
-        border: 1px solid #B5D4F4 !important;
+    .stButton > button {
+        background-color: #1F4E79 !important;
+        color: #FFFFFF !important;
+        border: none !important;
     }
-    .stButton > button[kind="secondary"]:hover, div[data-testid="stExpander"] .stButton > button:hover {
-        background-color: #B5D4F4 !important;
-        color: #0C447C !important;
+    .stButton > button:hover {
+        background-color: #2E75B6 !important;
+        color: #FFFFFF !important;
     }
     audio { width: 100% !important; border-radius: 8px; display: block; }
 </style>
