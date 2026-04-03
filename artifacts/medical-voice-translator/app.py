@@ -313,6 +313,9 @@ st.markdown("""
         color: #FFFFFF !important;
     }
     audio { width: 100% !important; border-radius: 8px; display: block; }
+    footer { display: none !important; }
+    #MainMenu { display: none !important; }
+    header { display: none !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -332,12 +335,22 @@ ui            = UI[direction]
 mic_lang_code = "en-US" if direction == "en->es" else "es-ES"
 lang_key      = "en" if direction == "en->es" else "es"
 
-# ── Header ────────────────────────────────────────────────────────────────────
-st.title("🩺 Medical Voice Translator")
+# ── Header — dark blue banner ─────────────────────────────────────────────────
 st.markdown(f"""
-<p style="font-size:11px; color:#aaa; margin-top:2px; margin-bottom:16px; line-height:1.5;">
-    {ui['disclaimer']}
-</p>
+<div style="background:#1F4E79; border-radius:12px; padding:16px 18px; margin-bottom:16px;">
+    <div style="font-size:clamp(1rem, 5vw, 1.4rem); font-weight:700; color:#ffffff;
+                letter-spacing:-0.3px; white-space:nowrap; overflow:hidden;
+                text-overflow:ellipsis;">
+        🩺 Medical Voice Translator
+    </div>
+    <div style="font-size:11px; color:#B5D4F4; margin-top:4px;">
+        English &#8596; Spanish &nbsp;·&nbsp; Audio Playback &nbsp;·&nbsp; Voice Input
+    </div>
+    <div style="font-size:10px; color:#7aadd4; margin-top:8px; padding-top:8px;
+                border-top:1px solid rgba(255,255,255,0.15);">
+        {ui['disclaimer']}
+    </div>
+</div>
 """, unsafe_allow_html=True)
 
 # ── Direction toggle ───────────────────────────────────────────────────────────
