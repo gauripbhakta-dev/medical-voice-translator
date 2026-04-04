@@ -98,6 +98,15 @@ CATEGORY_LABELS = {
     "🚨 Emergency":               {"es": "🚨 Emergencia"},
 }
 
+CATEGORY_COLORS = {
+    "🩹 Pain Assessment":         {"bg": "#FEF3C7", "border": "#D97706", "text": "#92400E"},
+    "🤒 Symptoms":                {"bg": "#FEE2E2", "border": "#DC2626", "text": "#991B1B"},
+    "💊 Medications & Allergies": {"bg": "#E0E7FF", "border": "#4338CA", "text": "#3730A3"},
+    "📋 Medical History":         {"bg": "#D1FAE5", "border": "#059669", "text": "#065F46"},
+    "✅ Consent & Instructions":  {"bg": "#E0F2FE", "border": "#0284C7", "text": "#075985"},
+    "🚨 Emergency":               {"bg": "#FFE4E6", "border": "#E11D48", "text": "#9F1239"},
+}
+
 MEDICAL_PHRASES = {
     "🩹 Pain Assessment": {
         "en": [
@@ -446,7 +455,16 @@ st.caption(ui["phrases_caption"])
 
 for category, langs in MEDICAL_PHRASES.items():
     label = CATEGORY_LABELS[category]["es"] if direction == "es->en" else category
-    with st.expander(label, expanded=False):
+    colors = CATEGORY_COLORS[category]
+    # Colored button-style header replacing the expander label visually
+    st.markdown(f"""
+    <div style="background:{colors['bg']}; border-left:4px solid {colors['border']};
+                border-radius:8px; padding:11px 14px; margin-bottom:2px;
+                font-size:15px; font-weight:600; color:{colors['text']};">
+        {label}
+    </div>
+    """, unsafe_allow_html=True)
+    with st.expander("", expanded=False):
         for phrase in langs[lang_key]:
             if st.button(phrase, use_container_width=True, key=f"phrase_{phrase}"):
                 with st.spinner(ui["spinner_tl"]):
