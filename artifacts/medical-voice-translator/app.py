@@ -66,14 +66,19 @@ def process_audio_input(audio, mic_lang_code):
         return None
 
 
-def do_translate(text):
+def do_translate(text, mode="text"):
+    """mode: 'voice' or 'text' — stores results separately"""
     direction  = st.session_state.direction
     tgt_lang   = "es" if direction == "en->es" else "en"
     translated = translate_text(text, direction)
     audio_b64  = generate_audio_b64(translated, tgt_lang)
-    st.session_state.translated = translated
-    st.session_state.tgt_lang   = tgt_lang
-    st.session_state.audio_b64  = audio_b64
+    st.session_state.tgt_lang = tgt_lang
+    if mode == "voice":
+        st.session_state.voice_translated = translated
+        st.session_state.voice_audio_b64  = audio_b64
+    else:
+        st.session_state.text_translated = translated
+        st.session_state.text_audio_b64  = audio_b64
 
 
 def render_audio(b64: str):
@@ -240,6 +245,8 @@ UI = {
         "disclaimer":       "No data stored · For communication assistance only · Not a substitute for a certified medical interpreter",
         "tl_label":         "Translation",
         "placeholder_tl":   "Translation will appear here.",
+        "voice_tl_label":   "Voice Translation",
+        "text_tl_label":    "Text Translation",
     },
     "es->en": {
         "btn1":             "🇺🇸 EN → ES",
@@ -260,6 +267,8 @@ UI = {
         "disclaimer":       "Sin datos almacenados · Solo asistencia en comunicación · No sustituye a un intérprete médico certificado",
         "tl_label":         "Traducción",
         "placeholder_tl":   "La traducción aparecerá aquí.",
+        "voice_tl_label":   "Traducción de voz",
+        "text_tl_label":    "Traducción de texto",
     }
 }
 
@@ -331,12 +340,16 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 for key, default in {
-    "direction":     "en->es",
-    "translated":    "",
-    "tgt_lang":      "es",
-    "last_audio_id": None,
-    "audio_b64":     None,
-    "input_text":    "",
+    "direction":          "en->es",
+    "last_audio_id":      None,
+    "input_text":         "",
+    # Voice translation
+    "voice_translated":   "",
+    "voice_audio_b64":    None,
+    # Text translation
+    "text_translated":    "",
+    "text_audio_b64":     None,
+    "tgt_lang":           "es",
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
@@ -369,12 +382,12 @@ col1, col2 = st.columns(2)
 with col1:
     if st.button(ui["btn1"], use_container_width=True,
                  type="primary" if direction == "en->es" else "secondary"):
-        st.session_state.update({"direction":"en->es","translated":"","audio_b64":None,"input_text":""})
+        st.session_state.update({"direction":"en->es","voice_translated":"","voice_audio_b64":None,"text_translated":"","text_audio_b64":None,"input_text":""})
         st.rerun()
 with col2:
     if st.button(ui["btn2"], use_container_width=True,
                  type="primary" if direction == "es->en" else "secondary"):
-        st.session_state.update({"direction":"es->en","translated":"","audio_b64":None,"input_text":""})
+        st.session_state.update({"direction":"es->en","voice_translated":"","voice_audio_b64":None,"text_translated":"","text_audio_b64":None,"input_text":""})
         st.rerun()
 
 st.markdown("<div style='margin-bottom:12px;'></div>", unsafe_allow_html=True)
@@ -382,7 +395,50 @@ st.markdown("<div style='margin-bottom:12px;'></div>", unsafe_allow_html=True)
 # ── INPUT ZONE ────────────────────────────────────────────────────────────────
 st.subheader(ui["input_section"])
 
-# Input zone
+# ── Voice recorder ────────────────────────────────────────────────────────────
+if VOICE_INPUT_AVAILABLE:
+    voice_title = "🎙️ Record Voice Input" if direction == "en->es" else "🎙️ Grabar entrada de voz"
+    st.markdown(f"""
+    <div style="background:#EBF3FB; border:1.5px dashed #2E75B6; border-radius:10px;
+                padding:10px 14px; margin:4px 0 4px 0; text-align:center;">
+        <div style="font-size:15px; font-weight:600; color:#1F4E79; margin-bottom:2px;">
+            {voice_title}
+        </div>
+        <div style="font-size:11px; color:#2E75B6;">{ui['voice_hint']}</div>
+    </div>
+    """, unsafe_allow_html=True)
+    audio = st.audio_input("", key="audio_recorder", label_visibility="collapsed")
+else:
+    audio = None
+
+if audio is not None:
+    audio_id = hash(audio.getvalue())
+    if audio_id != st.session_state.last_audio_id:
+        st.session_state.last_audio_id = audio_id
+        with st.spinner(ui["spinner_trans"]):
+            spoken = process_audio_input(audio, mic_lang_code)
+        if spoken:
+            st.session_state.input_text = spoken
+            with st.spinner(ui["spinner_tl"]):
+                do_translate(spoken, mode="voice")
+            st.success(f"{ui['heard']} *{spoken}*")
+
+# Voice translation — directly below recorder
+if st.session_state.voice_translated:
+    st.markdown(f"""
+    <div style="background:#E6F6F4; border-left:4px solid #009E73; border-radius:8px;
+                padding:10px 14px; margin:4px 0 8px 0;">
+        <div style="font-size:10px; font-weight:700; color:#005740; text-transform:uppercase;
+                    letter-spacing:0.5px; margin-bottom:5px;">🔊 {ui["voice_tl_label"]}</div>
+        <div style="font-size:15px; color:#005740; font-weight:600;">{st.session_state.voice_translated}</div>
+    </div>
+    """, unsafe_allow_html=True)
+    if st.session_state.voice_audio_b64:
+        render_audio(st.session_state.voice_audio_b64)
+
+st.markdown("<hr style='border:none; border-top:1px solid rgba(128,128,128,0.15); margin:10px 0;'>", unsafe_allow_html=True)
+
+# ── Text input ─────────────────────────────────────────────────────────────────
 typed_text = st.text_area(
     ui["text_label"],
     value=st.session_state.input_text,
@@ -394,62 +450,25 @@ typed_text = st.text_area(
 st.session_state.input_text = typed_text
 translate_clicked = st.button(ui["translate_btn"], type="primary", use_container_width=True)
 
-# Voice recorder
-if VOICE_INPUT_AVAILABLE:
-    # Voice recorder title switches language with UI
-    voice_title = "🎙️ Record Voice Input" if direction == "en->es" else "🎙️ Grabar entrada de voz"
-    st.markdown(f"""
-    <div style="background:#EBF3FB; border:1.5px dashed #2E75B6; border-radius:10px;
-                padding:10px 14px; margin: 8px 0 4px 0; text-align:center;">
-        <div style="font-size:15px; font-weight:600; color:#1F4E79; margin-bottom:2px;">
-            {voice_title}
-        </div>
-        <div style="font-size:11px; color:#2E75B6;">
-            {ui['voice_hint']}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    audio = st.audio_input("", key="audio_recorder", label_visibility="collapsed")
-else:
-    audio = None
-
-# Handle voice recording
-if audio is not None:
-    audio_id = hash(audio.getvalue())
-    if audio_id != st.session_state.last_audio_id:
-        st.session_state.last_audio_id = audio_id
-        with st.spinner(ui["spinner_trans"]):
-            spoken = process_audio_input(audio, mic_lang_code)
-        if spoken:
-            st.session_state.input_text = spoken
-            with st.spinner(ui["spinner_tl"]):
-                do_translate(spoken)
-            st.success(f"{ui['heard']} *{spoken}*")
-
-# Handle translate button
 if translate_clicked:
     if st.session_state.input_text.strip():
         with st.spinner(ui["spinner_tl"]):
-            do_translate(st.session_state.input_text.strip())
+            do_translate(st.session_state.input_text.strip(), mode="text")
     else:
         st.warning(ui["translate_warn"])
 
-st.markdown("<div style='margin-bottom:4px;'></div>", unsafe_allow_html=True)
-
-# ── TRANSLATION + AUDIO ZONE ──────────────────────────────────────────────────
-st.subheader(ui["tl_label"])
-if st.session_state.translated:
-    st.success(st.session_state.translated)
-    if st.session_state.audio_b64:
-        render_audio(st.session_state.audio_b64)
-else:
+# Text translation — directly below text input + translate button
+if st.session_state.text_translated:
     st.markdown(f"""
-    <p style="font-size:14px; color:#bbb; padding: 4px 0 12px 0;">
-        {ui['placeholder_tl']}
-    </p>
+    <div style="background:#E6F6F4; border-left:4px solid #009E73; border-radius:8px;
+                padding:10px 14px; margin:4px 0 4px 0;">
+        <div style="font-size:10px; font-weight:700; color:#005740; text-transform:uppercase;
+                    letter-spacing:0.5px; margin-bottom:5px;">🔊 {ui["text_tl_label"]}</div>
+        <div style="font-size:15px; color:#005740; font-weight:600;">{st.session_state.text_translated}</div>
+    </div>
     """, unsafe_allow_html=True)
-
-st.markdown("<div style='margin-bottom:4px;'></div>", unsafe_allow_html=True)
+    if st.session_state.text_audio_b64:
+        render_audio(st.session_state.text_audio_b64)
 
 # ── QUICK PHRASES ZONE ────────────────────────────────────────────────────────
 st.subheader(ui["phrases_title"])
@@ -470,11 +489,11 @@ for category, langs in MEDICAL_PHRASES.items():
         for phrase in langs[lang_key]:
             if st.button(phrase, use_container_width=True, key=f"phrase_{phrase}"):
                 with st.spinner(ui["spinner_tl"]):
-                    do_translate(phrase)
+                    do_translate(phrase, mode="text")
                 st.session_state.input_text = phrase
-                st.success(f"**{ui['tl_label']}:** {st.session_state.translated}")
-                if st.session_state.audio_b64:
-                    render_audio(st.session_state.audio_b64)
+                st.success(f"**{ui['tl_label']}:** {st.session_state.text_translated}")
+                if st.session_state.text_audio_b64:
+                    render_audio(st.session_state.text_audio_b64)
 
 # ── About ─────────────────────────────────────────────────────────────────────
 st.divider()
