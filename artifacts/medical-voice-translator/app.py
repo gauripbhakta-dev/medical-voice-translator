@@ -98,13 +98,15 @@ CATEGORY_LABELS = {
     "🚨 Emergency":               {"es": "🚨 Emergencia"},
 }
 
+# Wong color blind safe palette — used in Nature & scientific publications
+# Safe for deuteranopia, protanopia & tritanopia
 CATEGORY_COLORS = {
-    "🩹 Pain Assessment":         {"bg": "#FEF3C7", "border": "#D97706", "text": "#92400E"},
-    "🤒 Symptoms":                {"bg": "#FEE2E2", "border": "#DC2626", "text": "#991B1B"},
-    "💊 Medications & Allergies": {"bg": "#E0E7FF", "border": "#4338CA", "text": "#3730A3"},
-    "📋 Medical History":         {"bg": "#D1FAE5", "border": "#059669", "text": "#065F46"},
-    "✅ Consent & Instructions":  {"bg": "#E0F2FE", "border": "#0284C7", "text": "#075985"},
-    "🚨 Emergency":               {"bg": "#FFE4E6", "border": "#E11D48", "text": "#9F1239"},
+    "🩹 Pain Assessment":         {"bg": "#E8F4FD", "border": "#0072B2", "text": "#004B75"},
+    "🤒 Symptoms":                {"bg": "#FFF3E0", "border": "#E69F00", "text": "#7A5400"},
+    "💊 Medications & Allergies": {"bg": "#E6F6F4", "border": "#009E73", "text": "#005740"},
+    "📋 Medical History":         {"bg": "#FFF8E1", "border": "#F0E442", "text": "#6B6100"},
+    "✅ Consent & Instructions":  {"bg": "#F3EFF9", "border": "#CC79A7", "text": "#7B3F63"},
+    "🚨 Emergency":               {"bg": "#FDECEA", "border": "#D55E00", "text": "#8B3A00"},
 }
 
 MEDICAL_PHRASES = {
