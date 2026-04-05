@@ -30,6 +30,9 @@ def translate_text(text: str, direction: str) -> str:
 
 def generate_audio_b64(text: str, lang: str):
     try:
+        # Fix 911 pronunciation — gTTS reads it as "nine hundred eleven"
+        # Replace with "9-1-1" so it reads as "nine one one"
+        text = text.replace("911", "9-1-1").replace("9-1-1-1-1", "9-1-1")
         tts = gTTS(text=text, lang=lang)
         buf = io.BytesIO()
         tts.write_to_fp(buf)
