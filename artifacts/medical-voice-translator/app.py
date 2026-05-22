@@ -1,5 +1,6 @@
 """
 Medical Voice Translator - Stable working version
+With regional Spanish variant support (feature flagged)
 """
 
 import io
@@ -16,6 +17,14 @@ try:
     VOICE_INPUT_AVAILABLE = True
 except ImportError:
     VOICE_INPUT_AVAILABLE = False
+
+# ── Regional variant feature flag ─────────────────────────────────────────────
+# Set to True to enable the regional Spanish variant selector
+# Set to False (default) to keep the app working exactly as before
+REGIONAL_VARIANTS_ENABLED = True
+
+if REGIONAL_VARIANTS_ENABLED:
+    from regional_medical_spanish import REGIONAL_VARIANTS, get_regional_translation, get_regional_translation_fuzzy
 
 
 def translate_text(text: str, direction: str) -> str:
@@ -82,6 +91,33 @@ def do_translate(text, mode="text"):
     else:
         st.session_state.text_translated = translated
         st.session_state.text_audio_b64  = audio_b64
+
+
+def do_translate_regional(phrase, region, mode="text"):
+    """
+    Translate using regional dictionary first, fall back to Google Translate.
+    Only used when REGIONAL_VARIANTS_ENABLED is True.
+    """
+    regional, notes = get_regional_translation_fuzzy(phrase, region)
+    if regional:
+        # Use regional variant from dictionary
+        audio_b64 = generate_audio_b64(regional, "es")
+        st.session_state.tgt_lang = "es"
+        if mode == "voice":
+            st.session_state.voice_translated = regional
+            st.session_state.voice_audio_b64  = audio_b64
+        else:
+            st.session_state.text_translated = regional
+            st.session_state.text_audio_b64  = audio_b64
+        # Show clinical note if available
+        if notes and "universally" not in notes.lower():
+            st.session_state.regional_note = notes
+        else:
+            st.session_state.regional_note = ""
+    else:
+        # Fall back to Google Translate
+        do_translate(phrase, mode)
+        st.session_state.regional_note = ""
 
 
 def render_audio(b64: str):
@@ -200,7 +236,7 @@ MEDICAL_PHRASES = {
             "Please take this medication twice a day.",
         ],
         "es": [
-            "Necesito examinarlo/a.",
+            "Necesito examinarlo/examinarla.",
             "Por favor firme este formulario.",
             "¿Entiende?",
             "¿Tiene alguna pregunta?",
@@ -211,107 +247,82 @@ MEDICAL_PHRASES = {
     "🚨 Emergency": {
         "en": [
             "Call 911 immediately.",
-            "Stay calm, help is coming.",
+            "Stay calm.",
             "Do not move.",
-            "Are you having a heart attack?",
-            "I am going to help you.",
-            "Is there someone I can call for you?",
+            "Help is on the way.",
+            "Are you having chest pain?",
+            "Are you allergic to anything?",
         ],
         "es": [
             "Llame al 911 inmediatamente.",
-            "Cálmese, la ayuda está en camino.",
+            "Mantenga la calma.",
             "No se mueva.",
-            "¿Está teniendo un ataque al corazón?",
-            "Le voy a ayudar.",
-            "¿Hay alguien a quien pueda llamar por usted?",
+            "La ayuda está en camino.",
+            "¿Tiene dolor en el pecho?",
+            "¿Es alérgico a algo?",
         ]
     },
 }
 
-UI = {
-    "en->es": {
-        "btn1":             "🇺🇸 EN → ES",
-        "btn2":             "🇪🇸 ES → EN",
-        "voice_hint":       "📱 Tap the microphone, speak, tap stop — translation happens automatically.",
-        "voice_btn":        "Tap to record",
-        "text_label":       "Type in English:",
-        "text_placeholder": "Enter English text here…",
-        "translate_btn":    "🔄 Translate",
-        "translate_warn":   "Please type or record some text before translating.",
-        "input_section":    "Input",
-        "translation":      "Translation",
-        "phrases_title":    "⚕️ Quick Phrases",
-        "phrases_caption":  "Tap a phrase to translate it to Spanish and hear the audio.",
-        "heard":            "✅ Heard:",
-        "spinner_trans":    "Transcribing...",
-        "spinner_tl":       "Translating...",
-        "disclaimer":       "No data stored · For communication assistance only · Not a substitute for a certified medical interpreter",
-        "tl_label":         "Translation",
-        "placeholder_tl":   "Translation will appear here.",
-        "voice_tl_label":   "Voice Translation",
-        "text_tl_label":    "Text Translation",
-    },
-    "es->en": {
-        "btn1":             "🇺🇸 EN → ES",
-        "btn2":             "🇪🇸 ES → EN",
-        "voice_hint":       "📱 Toque el micrófono, hable, toque detener — la traducción ocurre automáticamente.",
-        "voice_btn":        "Toque para grabar",
-        "text_label":       "Escriba en Español:",
-        "text_placeholder": "Ingrese texto en español aquí…",
-        "translate_btn":    "🔄 Traducir",
-        "translate_warn":   "Por favor escriba o grabe texto antes de traducir.",
-        "input_section":    "Entrada",
-        "translation":      "Traducción",
-        "phrases_title":    "⚕️ Frases rápidas",
-        "phrases_caption":  "Toca una frase para traducirla al inglés y escuchar el audio.",
-        "heard":            "✅ Escuché:",
-        "spinner_trans":    "Transcribiendo...",
-        "spinner_tl":       "Traduciendo...",
-        "disclaimer":       "Sin datos almacenados · Solo asistencia en comunicación · No sustituye a un intérprete médico certificado",
-        "tl_label":         "Traducción",
-        "placeholder_tl":   "La traducción aparecerá aquí.",
-        "voice_tl_label":   "Traducción de voz",
-        "text_tl_label":    "Traducción de texto",
-    }
+# ── Region display names and keys ─────────────────────────────────────────────
+REGION_OPTIONS = {
+    "neutral":      "🌎 General Spanish",
+    "dominican":    "🇩🇴 Dominican Republic",
+    "puerto_rican": "🇵🇷 Puerto Rico",
+    "mexican":      "🇲🇽 Mexico",
+    "colombian":    "🇨🇴 Colombia",
+    "cuban":        "🇨🇺 Cuba",
 }
 
-st.set_page_config(
-    page_title="Medical Voice Translator",
-    page_icon="🩺",
-    layout="centered",
-    initial_sidebar_state="collapsed"
-)
+UI = {
+    "en->es": {
+        "btn1":           "🇺🇸 English → Spanish",
+        "btn2":           "🇲🇽 Spanish → English",
+        "input_section":  "Type or Speak",
+        "voice_hint":     "Tap the microphone to record",
+        "spinner_trans":  "Transcribing...",
+        "spinner_tl":     "Translating...",
+        "heard":          "🎙️ Heard",
+        "voice_tl_label": "Voice Translation",
+        "text_label":     "Type in English",
+        "text_placeholder": "Type a phrase to translate...",
+        "translate_btn":  "Translate",
+        "translate_warn": "Please enter some text to translate.",
+        "text_tl_label":  "Translation",
+        "phrases_title":  "Quick Phrases",
+        "phrases_caption":"Tap a phrase to translate instantly",
+        "tl_label":       "Translation",
+        "disclaimer":     "⚠️ For brief clinical exchanges only. Not a replacement for professional interpreters.",
+    },
+    "es->en": {
+        "btn1":           "🇺🇸 English → Spanish",
+        "btn2":           "🇲🇽 Spanish → English",
+        "input_section":  "Escriba o hable",
+        "voice_hint":     "Toque el micrófono para grabar",
+        "spinner_trans":  "Transcribiendo...",
+        "spinner_tl":     "Traduciendo...",
+        "heard":          "🎙️ Escuché",
+        "voice_tl_label": "Traducción de voz",
+        "text_label":     "Escriba en español",
+        "text_placeholder": "Escriba una frase para traducir...",
+        "translate_btn":  "Traducir",
+        "translate_warn": "Por favor ingrese texto para traducir.",
+        "text_tl_label":  "Traducción",
+        "phrases_title":  "Frases rápidas",
+        "phrases_caption":"Toque una frase para traducir al instante",
+        "tl_label":       "Traducción",
+        "disclaimer":     "⚠️ Solo para intercambios clínicos breves. No reemplaza a intérpretes profesionales.",
+    },
+}
 
-# Google Analytics — inject into parent page via postMessage workaround
+# ── Google Analytics ───────────────────────────────────────────────────────────
 components.html("""
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PM770KN3NX"></script>
 <script>
-(function() {
-    // Send gtag script to parent window to bypass iframe sandbox
-    var script1 = document.createElement('script');
-    script1.async = true;
-    script1.src = 'https://www.googletagmanager.com/gtag/js?id=G-PM770KN3NX';
-    
-    var script2 = document.createElement('script');
-    script2.innerHTML = `
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-PM770KN3NX', {
-            'page_title': 'Medical Voice Translator',
-            'page_location': window.location.href
-        });
-    `;
-    
-    // Try appending to parent document
-    try {
-        window.parent.document.head.appendChild(script1);
-        window.parent.document.head.appendChild(script2);
-    } catch(e) {
-        // Fallback: append to current iframe
-        document.head.appendChild(script1);
-        document.head.appendChild(script2);
-    }
-})();
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PM770KN3NX');
 </script>
 """, height=0)
 
@@ -342,10 +353,13 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# ── Session state defaults ─────────────────────────────────────────────────────
 for key, default in {
     "direction":          "en->es",
+    "region":             "neutral",
     "last_audio_id":      None,
     "input_text":         "",
+    "regional_note":      "",
     # Voice translation
     "voice_translated":   "",
     "voice_audio_b64":    None,
@@ -362,7 +376,7 @@ ui            = UI[direction]
 mic_lang_code = "en-US" if direction == "en->es" else "es-ES"
 lang_key      = "en" if direction == "en->es" else "es"
 
-# ── Header — dark blue banner ─────────────────────────────────────────────────
+# ── Header — dark blue banner ──────────────────────────────────────────────────
 st.markdown(f"""
 <div style="background:#1F4E79; border-radius:12px; padding:16px 18px; margin-bottom:16px;">
     <div style="font-size:clamp(1rem, 5vw, 1.4rem); font-weight:700; color:#ffffff;
@@ -385,15 +399,25 @@ col1, col2 = st.columns(2)
 with col1:
     if st.button(ui["btn1"], use_container_width=True,
                  type="primary" if direction == "en->es" else "secondary"):
-        st.session_state.update({"direction":"en->es","voice_translated":"","voice_audio_b64":None,"text_translated":"","text_audio_b64":None,"input_text":""})
+        st.session_state.update({"direction":"en->es","voice_translated":"","voice_audio_b64":None,"text_translated":"","text_audio_b64":None,"input_text":"","regional_note":""})
         st.rerun()
 with col2:
     if st.button(ui["btn2"], use_container_width=True,
                  type="primary" if direction == "es->en" else "secondary"):
-        st.session_state.update({"direction":"es->en","voice_translated":"","voice_audio_b64":None,"text_translated":"","text_audio_b64":None,"input_text":""})
+        st.session_state.update({"direction":"es->en","voice_translated":"","voice_audio_b64":None,"text_translated":"","text_audio_b64":None,"input_text":"","regional_note":""})
         st.rerun()
 
 st.markdown("<div style='margin-bottom:12px;'></div>", unsafe_allow_html=True)
+
+# ── Regional variant selector — only shows when feature flag is True ───────────
+if REGIONAL_VARIANTS_ENABLED and direction == "en->es":
+    selected_display = st.selectbox(
+        "Patient's Spanish Region",
+        options=list(REGION_OPTIONS.keys()),
+        format_func=lambda x: REGION_OPTIONS[x],
+        key="region",
+        help="Select the patient's country of origin for more accurate regional translations."
+    )
 
 # ── INPUT ZONE ────────────────────────────────────────────────────────────────
 st.subheader(ui["input_section"])
@@ -423,7 +447,10 @@ if audio is not None:
         if spoken:
             st.session_state.input_text = spoken
             with st.spinner(ui["spinner_tl"]):
-                do_translate(spoken, mode="voice")
+                if REGIONAL_VARIANTS_ENABLED and direction == "en->es":
+                    do_translate_regional(spoken, st.session_state.get("region", "neutral"), mode="voice")
+                else:
+                    do_translate(spoken, mode="voice")
             st.success(f"{ui['heard']} *{spoken}*")
 
 # Voice translation — directly below recorder
@@ -456,7 +483,14 @@ translate_clicked = st.button(ui["translate_btn"], type="primary", use_container
 if translate_clicked:
     if st.session_state.input_text.strip():
         with st.spinner(ui["spinner_tl"]):
-            do_translate(st.session_state.input_text.strip(), mode="text")
+            if REGIONAL_VARIANTS_ENABLED and direction == "en->es":
+                do_translate_regional(
+                    st.session_state.input_text.strip(),
+                    st.session_state.get("region", "neutral"),
+                    mode="text"
+                )
+            else:
+                do_translate(st.session_state.input_text.strip(), mode="text")
     else:
         st.warning(ui["translate_warn"])
 
@@ -472,6 +506,9 @@ if st.session_state.text_translated:
     """, unsafe_allow_html=True)
     if st.session_state.text_audio_b64:
         render_audio(st.session_state.text_audio_b64)
+    # Show clinical note if regional variant was used
+    if REGIONAL_VARIANTS_ENABLED and st.session_state.get("regional_note"):
+        st.info(f"📋 Clinical note: {st.session_state.regional_note}")
 
 # ── QUICK PHRASES ZONE ────────────────────────────────────────────────────────
 st.subheader(ui["phrases_title"])
@@ -492,11 +529,22 @@ for category, langs in MEDICAL_PHRASES.items():
         for phrase in langs[lang_key]:
             if st.button(phrase, use_container_width=True, key=f"phrase_{phrase}"):
                 with st.spinner(ui["spinner_tl"]):
-                    do_translate(phrase, mode="text")
+                    # Use regional dictionary if feature enabled and translating en->es
+                    if REGIONAL_VARIANTS_ENABLED and direction == "en->es":
+                        do_translate_regional(
+                            phrase,
+                            st.session_state.get("region", "neutral"),
+                            mode="text"
+                        )
+                    else:
+                        do_translate(phrase, mode="text")
                 st.session_state.input_text = phrase
                 st.success(f"**{ui['tl_label']}:** {st.session_state.text_translated}")
                 if st.session_state.text_audio_b64:
                     render_audio(st.session_state.text_audio_b64)
+                # Show clinical note if regional variant was used
+                if REGIONAL_VARIANTS_ENABLED and st.session_state.get("regional_note"):
+                    st.info(f"📋 Clinical note: {st.session_state.regional_note}")
 
 # ── About ─────────────────────────────────────────────────────────────────────
 st.divider()
