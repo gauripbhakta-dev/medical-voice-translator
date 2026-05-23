@@ -527,7 +527,7 @@ for category, langs in MEDICAL_PHRASES.items():
     """, unsafe_allow_html=True)
     with st.expander("", expanded=False):
         for phrase in langs[lang_key]:
-            if st.button(phrase, use_container_width=True, key=f"phrase_{phrase}"):
+            if st.button(phrase, use_container_width=True, key=f"phrase_{category}_{phrase}"):
                 with st.spinner(ui["spinner_tl"]):
                     # Use regional dictionary if feature enabled and translating en->es
                     if REGIONAL_VARIANTS_ENABLED and direction == "en->es":
