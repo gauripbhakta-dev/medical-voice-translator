@@ -47,3 +47,18 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# ML model files — downloaded on app start by Streamlit Cloud
+*.onnx
+*.onnx.json
+*.bin
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Streamlit secrets
+.streamlit/secrets.toml
+
+# Argos downloaded packages
+.argos-translate/

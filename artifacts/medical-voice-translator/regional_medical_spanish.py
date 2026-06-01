@@ -1,27 +1,24 @@
 # =============================================================================
 # Medical Voice Translator — Regional Spanish Variant Dictionary
 # =============================================================================
-# Purpose: Override neutral Google Translate output with clinically accurate
-#          regional Spanish variants for specific patient communities.
+# Purpose: Provides clinically accurate regional Spanish variants AND
+#          correct English back-translations for all preset phrases.
 #
 # How it works:
-#   1. Google Translate provides the default neutral Latin American Spanish
-#   2. This dictionary overrides specific terms where regional variation
-#      is clinically meaningful
-#   3. If a term has no regional override, the Google Translate output is used
+#   EN→ES: Returns region-specific Spanish translation
+#   ES→EN: Returns correct English back-translation from dictionary
+#          (bypasses Argos Translate for all preset phrases)
 #
 # Regions covered:
-#   - neutral:      Standard Latin American Spanish (Google Translate default)
-#   - dominican:    Dominican Republic (largest LEP population in Lawrence MA)
+#   - neutral:      Standard Latin American Spanish
+#   - dominican:    Dominican Republic
 #   - puerto_rican: Puerto Rico
-#   - mexican:      Mexico (largest Spanish-speaking group in US overall)
-#   - colombian:    Colombia and South America broadly
+#   - mexican:      Mexico
+#   - colombian:    Colombia
 #   - cuban:        Cuba
 #
 # Status: DRAFT — requires review by clinical experts
-#         clinical expert review
-#
-# Last updated: April 2026
+# Last updated: May 2026
 # Author: Gauri Bhakta, Phillips Academy Andover
 # =============================================================================
 
@@ -58,7 +55,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "¿El dolor es agudo o leve?",
         "colombian":    "¿El dolor es agudo o sordo?",
         "cuban":        "¿El dolor es fuerte o suave?",
-        "notes": "'Sordo' for dull pain is more academic — Dominican and Cuban patients may respond better to 'suave' or 'leve'"
+        "notes": "'Sordo' for dull pain is more academic — Dominican and Cuban patients respond better to 'suave' or 'leve'"
     },
 
     "Is the pain constant or does it come and go?": {
@@ -78,7 +75,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "¿El dolor se va a otro lado?",
         "colombian":    "¿El dolor irradia a otra parte?",
         "cuban":        "¿El dolor se va para algún otro lugar?",
-        "notes": "'Irradia' is the clinical term but most patients understand 'se corre' or 'se va' better"
+        "notes": "'Irradia' is clinical but most patients understand 'se corre' or 'se va' better"
     },
 
     "Does anything make the pain better?": {
@@ -112,7 +109,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "¿Tiene fiebre o calentura?",
         "colombian":    "¿Tiene fiebre?",
         "cuban":        "¿Tiene fiebre?",
-        "notes": "CLINICALLY IMPORTANT: Dominican patients often say 'calentura' for fever, not 'fiebre'. Mexican patients may use both."
+        "notes": "CLINICALLY IMPORTANT: Dominican patients often say 'calentura' not 'fiebre'. Mexican patients may use both."
     },
 
     "Are you short of breath?": {
@@ -122,7 +119,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "¿Le falta el aire?",
         "colombian":    "¿Tiene dificultad para respirar?",
         "cuban":        "¿Le falta el aire?",
-        "notes": "'Le falta el aire' is the most universally understood across all regions. Preferred over clinical 'dificultad para respirar'"
+        "notes": "'Le falta el aire' most universally understood across all regions"
     },
 
     "Are you dizzy?": {
@@ -142,7 +139,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "¿Tiene asco o náuseas?",
         "colombian":    "¿Tiene náuseas?",
         "cuban":        "¿Tiene náuseas?",
-        "notes": "CLINICALLY IMPORTANT: Dominican patients may not recognize 'náuseas' — 'ganas de vomitar' is more reliable. Mexican: 'asco' is colloquial for nausea."
+        "notes": "CLINICALLY IMPORTANT: Dominican patients may not recognize 'náuseas' — 'ganas de vomitar' is more reliable"
     },
 
     "Have you vomited?": {
@@ -162,7 +159,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "¿Tiene dolor de cabeza?",
         "colombian":    "¿Tiene dolor de cabeza?",
         "cuban":        "¿Le duele la cabeza?",
-        "notes": "Both phrasings widely understood. 'Jaqueca' or 'migraña' may be used for migraine specifically."
+        "notes": "Both phrasings widely understood"
     },
 
     "Do you have chest pain?": {
@@ -182,7 +179,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "¿Le duele el estómago?",
         "colombian":    "¿Tiene dolor en el abdomen?",
         "cuban":        "¿Le duele el estómago?",
-        "notes": "IMPORTANT: 'Abdominal' is not commonly used colloquially. 'Barriga' (Dominican), 'estómago' (PR/MX) are more natural. Colombian patients may understand 'abdomen'."
+        "notes": "IMPORTANT: 'Abdominal' not commonly used colloquially. 'Barriga' (Dominican), 'estómago' (PR/MX) more natural"
     },
 
     "Are you having trouble urinating?": {
@@ -192,7 +189,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "¿Tiene problemas para orinar?",
         "colombian":    "¿Tiene dificultad para orinar?",
         "cuban":        "¿Tiene problemas para orinar?",
-        "notes": "Dominican patients may use 'hacer pipí' or 'hacer del uno'. 'Orinar' is universally understood as the clinical term."
+        "notes": "Dominican patients may use 'hacer pipí' or 'hacer del uno'"
     },
 
     # =========================================================================
@@ -216,7 +213,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "¿Está tomando medicamentos?",
         "colombian":    "¿Está tomando algún medicamento?",
         "cuban":        "¿Está tomando alguna medicina?",
-        "notes": "'Medicina' is more colloquial than 'medicamento' in Caribbean Spanish. Both understood everywhere."
+        "notes": "'Medicina' more colloquial than 'medicamento' in Caribbean Spanish"
     },
 
     "Do you have diabetes?": {
@@ -226,7 +223,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "¿Tiene diabetes?",
         "colombian":    "¿Tiene diabetes?",
         "cuban":        "¿Tiene azúcar?",
-        "notes": "CLINICALLY IMPORTANT: Caribbean patients (Dominican, PR, Cuban) commonly refer to diabetes as 'azúcar' — not 'diabetes'. A patient may say 'no' to diabetes but 'sí' to azúcar."
+        "notes": "CLINICALLY IMPORTANT: Caribbean patients (Dominican, PR, Cuban) commonly refer to diabetes as 'azúcar'"
     },
 
     "Do you have high blood pressure?": {
@@ -236,7 +233,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "¿Tiene presión alta?",
         "colombian":    "¿Tiene la tensión alta?",
         "cuban":        "¿Tiene la presión alta?",
-        "notes": "IMPORTANT: Colombian patients may say 'tensión' instead of 'presión'. Both mean blood pressure but a patient may not recognize the other term."
+        "notes": "IMPORTANT: Colombian patients may say 'tensión' instead of 'presión'"
     },
 
     "Do you have heart problems?": {
@@ -256,7 +253,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "¿Lo/La han operado antes?",
         "colombian":    "¿Ha tenido cirugías anteriormente?",
         "cuban":        "¿Lo/La han operado antes?",
-        "notes": "'Operado' is more colloquial and better understood than 'cirugía' across most regions"
+        "notes": "'Operado' more colloquial and better understood than 'cirugía'"
     },
 
     "Are you pregnant?": {
@@ -266,7 +263,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "¿Está embarazada?",
         "colombian":    "¿Está embarazada?",
         "cuban":        "¿Está embarazada?",
-        "notes": "Universally consistent. Some Mexican patients may say 'encinta' but 'embarazada' is always understood."
+        "notes": "Universally consistent"
     },
 
     "When was your last menstrual period?": {
@@ -276,7 +273,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "¿Cuándo fue su última regla?",
         "colombian":    "¿Cuándo fue su última menstruación?",
         "cuban":        "¿Cuándo fue su última regla?",
-        "notes": "CLINICALLY IMPORTANT: Significant regional variation. Dominican: 'venir el período'. Puerto Rican: 'bajar'. Mexican: 'regla'. Colombian: 'menstruación'. Ask the question in the patient's regional term for clarity."
+        "notes": "CLINICALLY IMPORTANT: Significant regional variation. Dominican: 'venir el período'. Puerto Rican: 'bajar'. Mexican: 'regla'."
     },
 
     # =========================================================================
@@ -290,7 +287,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "Le voy a revisar",
         "colombian":    "Necesito examinarlo/examinarla",
         "cuban":        "Le voy a examinar",
-        "notes": "'Revisar' is more colloquial and widely understood than 'examinar' in Caribbean and Mexican Spanish"
+        "notes": "'Revisar' more colloquial and widely understood than 'examinar' in Caribbean and Mexican Spanish"
     },
 
     "I need to draw blood": {
@@ -300,7 +297,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "Le voy a tomar una muestra de sangre",
         "colombian":    "Necesito tomarle una muestra de sangre",
         "cuban":        "Le voy a sacar sangre",
-        "notes": "Minor variation — all understood. 'Sacar' is more direct and commonly used in Caribbean Spanish."
+        "notes": "'Sacar' more direct and commonly used in Caribbean Spanish"
     },
 
     "I need to start an IV": {
@@ -310,7 +307,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "Le voy a poner un catéter intravenoso",
         "colombian":    "Le voy a poner un suero",
         "cuban":        "Le voy a poner una vena",
-        "notes": "IMPORTANT: 'Suero' widely understood for IV drip. 'Poner una vena' is Cuban slang for starting an IV line. Dominican patients may need 'aguja en la vena' to understand."
+        "notes": "IMPORTANT: 'Suero' widely understood for IV. 'Poner una vena' is Cuban slang for starting an IV line"
     },
 
     "Do you understand?": {
@@ -320,7 +317,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "¿Entiende?",
         "colombian":    "¿Comprende?",
         "cuban":        "¿Entiende?",
-        "notes": "Consistent — both 'entiende' and 'comprende' universally understood"
+        "notes": "Both 'entiende' and 'comprende' universally understood"
     },
 
     "Please sign here": {
@@ -344,7 +341,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "Por favor recuéstese",
         "colombian":    "Por favor acuéstese",
         "cuban":        "Por favor échese",
-        "notes": "IMPORTANT: Dominican and Cuban patients commonly use 'echarse'. Mexican patients may prefer 'recostarse'."
+        "notes": "IMPORTANT: Dominican and Cuban patients commonly use 'echarse'. Mexican patients prefer 'recostarse'."
     },
 
     "Please sit up": {
@@ -374,7 +371,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "No coma ni beba nada",
         "colombian":    "No coma ni beba nada",
         "cuban":        "No coma ni tome nada",
-        "notes": "IMPORTANT: Caribbean patients use 'tomar' for drinking liquids, not 'beber'. 'Beber' sounds formal in Dominican and Puerto Rican Spanish."
+        "notes": "IMPORTANT: Caribbean patients use 'tomar' for drinking liquids, not 'beber'"
     },
 
     "I need a urine sample": {
@@ -384,7 +381,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "Necesito una muestra de orina",
         "colombian":    "Necesito una muestra de orina",
         "cuban":        "Necesito una muestra de orina",
-        "notes": "Dominican patients may respond better to 'hacer del uno' — highly colloquial but widely understood in Dominican communities"
+        "notes": "Dominican patients respond better to 'hacer del uno'"
     },
 
     "The doctor will see you soon": {
@@ -394,7 +391,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "El doctor lo/la atiende pronto",
         "colombian":    "El médico lo/la atenderá pronto",
         "cuban":        "El médico viene enseguida",
-        "notes": "Caribbean patients say 'ahora mismo' or 'enseguida' for soon. Colombian patients use 'médico' more formally than 'doctor'."
+        "notes": "Caribbean patients say 'ahora mismo' or 'enseguida' for soon"
     },
 
     # =========================================================================
@@ -418,7 +415,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "Tome este medicamento dos veces al día",
         "colombian":    "Tome este medicamento dos veces al día",
         "cuban":        "Tome esta medicina dos veces al día",
-        "notes": "Caribbean patients use 'medicina' — see medication note above"
+        "notes": "Caribbean patients use 'medicina'"
     },
 
     "Come back if symptoms worsen": {
@@ -428,7 +425,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "Regrese si los síntomas empeoran",
         "colombian":    "Regrese si los síntomas empeoran",
         "cuban":        "Si se pone peor, vuelva",
-        "notes": "Caribbean patients respond better to direct 'si se pone peor'. 'Síntomas' may not be understood by all patients — simplify when possible."
+        "notes": "Caribbean patients respond better to direct 'si se pone peor'"
     },
 
     "Follow up with your doctor in one week": {
@@ -438,7 +435,7 @@ REGIONAL_VARIANTS = {
         "mexican":      "Siga con su médico en una semana",
         "colombian":    "Consulte con su médico en una semana",
         "cuban":        "Vea a su médico en una semana",
-        "notes": "Significant variation in how patients describe 'making an appointment'. 'Buscar el doctor' is Dominican. 'Ver al doctor' is PR/Cuban."
+        "notes": "Significant variation in how patients describe making an appointment"
     },
 
     "Call 911 if you have an emergency": {
@@ -453,7 +450,151 @@ REGIONAL_VARIANTS = {
 }
 
 # =============================================================================
-# CRITICAL CLINICAL NOTES — Review with clinical experts
+# SPANISH → ENGLISH REVERSE DICTIONARY
+# Maps every Spanish preset phrase to its correct English translation.
+# This bypasses Argos Translate for preset phrases in Spanish→English mode,
+# ensuring accurate clinical back-translation regardless of pronoun ambiguity.
+# =============================================================================
+
+SPANISH_TO_ENGLISH = {
+    # Pain Assessment
+    "¿Dónde le duele?":                        "Where does it hurt?",
+    "Califique su dolor del 1 al 10":           "Rate your pain from 1 to 10",
+    "Dígame cuánto le duele del 1 al 10":       "Rate your pain from 1 to 10",
+    "¿Cuánto le duele del 1 al 10?":            "Rate your pain from 1 to 10",
+    "Del 1 al 10, ¿cuánto le duele?":           "Rate your pain from 1 to 10",
+    "Del 1 al 10, ¿qué tanto le duele?":        "Rate your pain from 1 to 10",
+    "¿El dolor es agudo o sordo?":              "Is the pain sharp or dull?",
+    "¿El dolor es fuerte o suave?":             "Is the pain sharp or dull?",
+    "¿El dolor es punzante o leve?":            "Is the pain sharp or dull?",
+    "¿El dolor es agudo o leve?":               "Is the pain sharp or dull?",
+    "¿El dolor es constante o va y viene?":     "Is the pain constant or does it come and go?",
+    "¿El dolor está siempre ahí o va y viene?": "Is the pain constant or does it come and go?",
+    "¿El dolor es continuo o va y viene?":      "Is the pain constant or does it come and go?",
+    "¿El dolor es seguido o va y viene?":       "Is the pain constant or does it come and go?",
+    "¿El dolor se va a algún otro lugar?":      "Does the pain go anywhere else?",
+    "¿El dolor corre para algún otro lado?":    "Does the pain go anywhere else?",
+    "¿El dolor se corre para otro lado?":       "Does the pain go anywhere else?",
+    "¿El dolor se va a otro lado?":             "Does the pain go anywhere else?",
+    "¿El dolor irradia a otra parte?":          "Does the pain go anywhere else?",
+    "¿El dolor se va para algún otro lugar?":   "Does the pain go anywhere else?",
+    "¿Hay algo que mejore el dolor?":           "Does anything make the pain better?",
+    "¿Hay algo que le quite el dolor?":         "Does anything make the pain better?",
+    "¿Algo le quita el dolor?":                 "Does anything make the pain better?",
+    "¿Hay algo que le alivie el dolor?":        "Does anything make the pain better?",
+    "¿Algo alivia el dolor?":                   "Does anything make the pain better?",
+    "¿Hay algo que empeore el dolor?":          "Does anything make the pain worse?",
+    "¿Hay algo que le ponga el dolor peor?":    "Does anything make the pain worse?",
+    "¿Algo le empeora el dolor?":               "Does anything make the pain worse?",
+    "¿Hay algo que le aumente el dolor?":       "Does anything make the pain worse?",
+    "¿Algo empeora el dolor?":                  "Does anything make the pain worse?",
+
+    # Symptoms
+    "¿Tiene fiebre?":                           "Do you have a fever?",
+    "¿Tiene calentura?":                        "Do you have a fever?",
+    "¿Tiene fiebre o calentura?":               "Do you have a fever?",
+    "¿Tiene dificultad para respirar?":         "Are you short of breath?",
+    "¿Le falta el aire?":                       "Are you short of breath?",
+    "¿Tiene mareos?":                           "Are you dizzy?",
+    "¿Está mareado/mareada?":                   "Are you dizzy?",
+    "¿Tiene náuseas?":                          "Are you nauseous?",
+    "¿Tiene ganas de vomitar?":                 "Are you nauseous?",
+    "¿Tiene asco o náuseas?":                   "Are you nauseous?",
+    "¿Ha vomitado?":                            "Have you vomited?",
+    "¿Tiene dolor de cabeza?":                  "Do you have a headache?",
+    "¿Le duele la cabeza?":                     "Do you have a headache?",
+    "¿Tiene dolor en el pecho?":                "Do you have chest pain?",
+    "¿Le duele el pecho?":                      "Do you have chest pain?",
+    "¿Tiene dolor abdominal?":                  "Do you have abdominal pain?",
+    "¿Le duele la barriga?":                    "Do you have abdominal pain?",
+    "¿Le duele el estómago?":                   "Do you have abdominal pain?",
+    "¿Tiene dolor en el abdomen?":              "Do you have abdominal pain?",
+    "¿Tiene problemas para orinar?":            "Are you having trouble urinating?",
+    "¿Tiene problemas para hacer pipí?":        "Are you having trouble urinating?",
+    "¿Tiene dificultad para orinar?":           "Are you having trouble urinating?",
+
+    # Medical History
+    "¿Tiene alguna alergia?":                   "Do you have any allergies?",
+    "¿Es alérgico/alérgica a algo?":            "Do you have any allergies?",
+    "¿Está tomando algún medicamento?":         "Are you taking any medications?",
+    "¿Está tomando alguna medicina?":           "Are you taking any medications?",
+    "¿Está tomando medicamentos?":              "Are you taking any medications?",
+    "¿Tiene diabetes?":                         "Do you have diabetes?",
+    "¿Tiene azúcar?":                           "Do you have diabetes?",
+    "¿Tiene presión alta?":                     "Do you have high blood pressure?",
+    "¿Tiene la presión alta?":                  "Do you have high blood pressure?",
+    "¿Tiene la tensión alta?":                  "Do you have high blood pressure?",
+    "¿Tiene problemas del corazón?":            "Do you have heart problems?",
+    "¿Tiene problemas cardíacos?":              "Do you have heart problems?",
+    "¿Ha tenido cirugías antes?":               "Have you had surgery before?",
+    "¿Lo/La han operado antes?":                "Have you had surgery before?",
+    "¿Ha tenido cirugías anteriormente?":       "Have you had surgery before?",
+    "¿Está embarazada?":                        "Are you pregnant?",
+    "¿Cuándo fue su última menstruación?":      "When was your last menstrual period?",
+    "¿Cuándo le vino el período?":              "When was your last menstrual period?",
+    "¿Cuándo le bajó?":                         "When was your last menstrual period?",
+    "¿Cuándo fue su última regla?":             "When was your last menstrual period?",
+
+    # Consent and Procedures
+    "Necesito examinarle":                      "I need to examine you",
+    "Le voy a revisar":                         "I need to examine you",
+    "Le voy a examinar":                        "I need to examine you",
+    "Necesito examinarlo/examinarla":           "I need to examine you",
+    "Necesito sacarle sangre":                  "I need to draw blood",
+    "Le voy a sacar sangre":                    "I need to draw blood",
+    "Le voy a tomar una muestra de sangre":     "I need to draw blood",
+    "Necesito tomarle una muestra de sangre":   "I need to draw blood",
+    "Necesito ponerle un suero":                "I need to start an IV",
+    "Le voy a poner una aguja en la vena":      "I need to start an IV",
+    "Le voy a poner un suero":                  "I need to start an IV",
+    "Le voy a poner un catéter intravenoso":    "I need to start an IV",
+    "Le voy a poner una vena":                  "I need to start an IV",
+    "¿Entiende?":                               "Do you understand?",
+    "¿Comprende?":                              "Do you understand?",
+    "Por favor firme aquí":                     "Please sign here",
+    "Por favor ponga su firma aquí":            "Please sign here",
+
+    # Instructions
+    "Por favor acuéstese":                      "Please lie down",
+    "Por favor échese":                         "Please lie down",
+    "Por favor recuéstese":                     "Please lie down",
+    "Por favor siéntese":                       "Please sit up",
+    "Por favor respire profundo":               "Please breathe deeply",
+    "Por favor respire hondo":                  "Please breathe deeply",
+    "No coma ni beba nada":                     "Do not eat or drink anything",
+    "No coma ni tome nada":                     "Do not eat or drink anything",
+    "Necesito una muestra de orina":            "I need a urine sample",
+    "Necesito que haga del uno en este vasito": "I need a urine sample",
+    "El médico le atenderá pronto":             "The doctor will see you soon",
+    "El doctor viene ahora mismo":              "The doctor will see you soon",
+    "El doctor viene enseguida":                "The doctor will see you soon",
+    "El doctor lo/la atiende pronto":           "The doctor will see you soon",
+    "El médico lo/la atenderá pronto":          "The doctor will see you soon",
+    "El médico viene enseguida":                "The doctor will see you soon",
+
+    # Discharge
+    "Ya puede irse a casa":                     "You can go home now",
+    "Ya se puede ir para su casa":              "You can go home now",
+    "Ya puede irse a la casa":                  "You can go home now",
+    "Ya se puede ir a su casa":                 "You can go home now",
+    "Ya puede regresar a casa":                 "You can go home now",
+    "Ya puede irse para la casa":               "You can go home now",
+    "Tome este medicamento dos veces al día":   "Take this medication twice a day",
+    "Tome esta medicina dos veces al día":      "Take this medication twice a day",
+    "Regrese si los síntomas empeoran":         "Come back if symptoms worsen",
+    "Si se pone peor, vuelva":                  "Come back if symptoms worsen",
+    "Haga cita con su médico en una semana":    "Follow up with your doctor in one week",
+    "Busque su doctor en una semana":           "Follow up with your doctor in one week",
+    "Vea a su doctor en una semana":            "Follow up with your doctor in one week",
+    "Siga con su médico en una semana":         "Follow up with your doctor in one week",
+    "Consulte con su médico en una semana":     "Follow up with your doctor in one week",
+    "Vea a su médico en una semana":            "Follow up with your doctor in one week",
+    "Llame al 911 si tiene una emergencia":     "Call 911 if you have an emergency",
+}
+
+
+# =============================================================================
+# CRITICAL CLINICAL NOTES
 # =============================================================================
 REVIEW_NOTES = """
 HIGHEST PRIORITY TERMS FOR CLINICAL REVIEW:
@@ -461,68 +602,54 @@ HIGHEST PRIORITY TERMS FOR CLINICAL REVIEW:
 1. DIABETES — 'azúcar' vs 'diabetes'
    Caribbean patients (Dominican, PR, Cuban) often refer to diabetes as 'azúcar'.
    A patient may deny having 'diabetes' but confirm having 'azúcar'.
-   RECOMMENDATION: Ask both — '¿Tiene diabetes o azúcar?'
 
 2. NAUSEA — 'náuseas' vs 'ganas de vomitar'
    Dominican patients may not recognize 'náuseas'.
-   RECOMMENDATION: Use 'ganas de vomitar' for Dominican patients.
 
 3. FEVER — 'fiebre' vs 'calentura'
    Dominican patients commonly say 'calentura' not 'fiebre'.
-   RECOMMENDATION: Use both — '¿Tiene fiebre o calentura?'
 
 4. BLOOD PRESSURE — 'presión' vs 'tensión'
    Colombian patients say 'tensión arterial' not 'presión arterial'.
-   RECOMMENDATION: Use 'presión' for most patients, 'tensión' if Colombian.
 
 5. MENSTRUAL PERIOD — major regional variation
    Dominican: 'el período' / 'me vino'
    Puerto Rican: 'me bajó'
    Mexican: 'la regla'
    Colombian: 'la menstruación'
-   RECOMMENDATION: This phrase needs most careful regional attention.
 
-6. IV LINE — significant variation
-   Cuban: 'poner una vena'
-   Dominican: 'aguja en la vena'
-   PR/MX: 'suero'
-   RECOMMENDATION: Show the equipment while speaking for all regions.
-
-7. DRINKING — 'beber' vs 'tomar'
+6. DRINKING — 'beber' vs 'tomar'
    Caribbean patients use 'tomar' for drinking liquids.
-   'No beba nada' may confuse Dominican/PR patients who associate 'beber' with alcohol only.
-   RECOMMENDATION: Always use 'no tome nada' for NPO instructions.
+   Always use 'no tome nada' for NPO instructions.
 """
 
+
 # =============================================================================
-# FUNCTION: Get regional translation
+# FUNCTIONS
 # =============================================================================
+
 def get_regional_translation(phrase_key, region="neutral"):
     """
-    Returns the regional variant of a phrase.
+    Returns the regional Spanish variant of an English phrase.
     Falls back to neutral if region or phrase not found.
-
-    Args:
-        phrase_key: The English phrase key
-        region: One of 'neutral', 'dominican', 'puerto_rican',
-                'mexican', 'colombian', 'cuban'
-
-    Returns:
-        tuple: (regional_translation, notes)
     """
     if phrase_key not in REGIONAL_VARIANTS:
-        return None, "Phrase not in regional dictionary — use Google Translate output"
-
+        return None, "Phrase not in regional dictionary"
     phrase_data = REGIONAL_VARIANTS[phrase_key]
     translation = phrase_data.get(region, phrase_data.get("neutral"))
     notes = phrase_data.get("notes", "")
-
     return translation, notes
 
 
-# =============================================================================
-# FUNCTION: Get all variants for a phrase (for review/display)
-# =============================================================================
+def get_english_back_translation(spanish_phrase):
+    """
+    Returns the correct English translation for a Spanish preset phrase.
+    Used in Spanish→English mode to bypass Argos Translate.
+    Returns None if phrase not in dictionary.
+    """
+    return SPANISH_TO_ENGLISH.get(spanish_phrase.strip(), None)
+
+
 def get_all_variants(phrase_key):
     """Returns all regional variants for a phrase."""
     if phrase_key not in REGIONAL_VARIANTS:
@@ -530,10 +657,95 @@ def get_all_variants(phrase_key):
     return REGIONAL_VARIANTS[phrase_key]
 
 
-# =============================================================================
-# FUNCTION: List all phrases by category (placeholder — expand after
-# Diana's feedback defines the six categories)
-# =============================================================================
+def normalize(text: str) -> str:
+    """Normalize text for fuzzy matching."""
+    import re
+    text = text.lower().strip()
+    text = re.sub(r'[^\w\s]', '', text)
+    text = re.sub(r'\s+', ' ', text)
+    return text
+
+
+def find_best_match(text: str):
+    """
+    Find the best matching dictionary key for any input text.
+    Handles case insensitive, punctuation differences, fuzzy word overlap.
+    Returns best matching dictionary key, or None if no match found.
+    """
+    normalized_input = normalize(text)
+
+    # 1. Exact match after normalization
+    for key in REGIONAL_VARIANTS:
+        if normalize(key) == normalized_input:
+            return key
+
+    # 2. Fuzzy word overlap matching
+    input_words = set(normalized_input.split())
+    best_key = None
+    best_score = 0.0
+
+    for key in REGIONAL_VARIANTS:
+        key_words = set(normalize(key).split())
+        if not key_words:
+            continue
+        intersection = len(input_words & key_words)
+        union = len(input_words | key_words)
+        score = intersection / union if union > 0 else 0.0
+        if score > best_score:
+            best_score = score
+            best_key = key
+
+    if best_score >= 0.65:
+        return best_key
+
+    return None
+
+
+def find_best_spanish_match(spanish_text: str):
+    """
+    Find the best English back-translation for Spanish input using fuzzy matching.
+    Used when exact match not found in SPANISH_TO_ENGLISH dictionary.
+    """
+    normalized_input = normalize(spanish_text)
+
+    # 1. Exact match
+    for spanish_key, english_val in SPANISH_TO_ENGLISH.items():
+        if normalize(spanish_key) == normalized_input:
+            return english_val
+
+    # 2. Fuzzy match
+    input_words = set(normalized_input.split())
+    best_val = None
+    best_score = 0.0
+
+    for spanish_key, english_val in SPANISH_TO_ENGLISH.items():
+        key_words = set(normalize(spanish_key).split())
+        if not key_words:
+            continue
+        intersection = len(input_words & key_words)
+        union = len(input_words | key_words)
+        score = intersection / union if union > 0 else 0.0
+        if score > best_score:
+            best_score = score
+            best_val = english_val
+
+    if best_score >= 0.65:
+        return best_val
+
+    return None
+
+
+def get_regional_translation_fuzzy(text: str, region: str = "neutral"):
+    """
+    Get regional translation using fuzzy matching.
+    Use this for voice input and free text.
+    """
+    matched_key = find_best_match(text)
+    if matched_key:
+        return get_regional_translation(matched_key, region)
+    return None, "No regional variant found"
+
+
 CATEGORY_MAP = {
     "Pain Assessment":      ["Where does it hurt?", "Rate your pain from 1 to 10",
                              "Is the pain sharp or dull?",
@@ -570,95 +782,25 @@ CATEGORY_MAP = {
 }
 
 if __name__ == "__main__":
-    # Quick test — print all variants for a high-priority phrase
-    print("=== DIABETES — CRITICAL CLINICAL TERM ===")
+    print(f"Total EN→ES phrases: {len(REGIONAL_VARIANTS)}")
+    print(f"Total ES→EN entries: {len(SPANISH_TO_ENGLISH)}")
+
+    print("\n=== DIABETES ===")
     variants = get_all_variants("Do you have diabetes?")
     for region, translation in variants.items():
         if region != "notes":
-            print(f"  {region:15}: {translation}")
-    print(f"  Notes: {variants['notes']}")
-    print()
+            back = get_english_back_translation(translation)
+            print(f"  {region:15}: {translation} → '{back}'")
 
-    print("=== FEVER — CRITICAL CLINICAL TERM ===")
-    variants = get_all_variants("Do you have a fever?")
-    for region, translation in variants.items():
-        if region != "notes":
-            print(f"  {region:15}: {translation}")
-    print(f"  Notes: {variants['notes']}")
-    print()
-
-    print(f"Total phrases in dictionary: {len(REGIONAL_VARIANTS)}")
-    print(f"Regions covered: neutral, dominican, puerto_rican, mexican, colombian, cuban")
-    print()
-    print("STATUS: DRAFT — Requires review by clinical experts")
-    print("        clinical expert review")
-
-
-def normalize(text: str) -> str:
-    """
-    Normalize text for fuzzy matching.
-    Removes punctuation, lowercases, strips whitespace.
-    """
-    import re
-    text = text.lower().strip()
-    text = re.sub(r'[^\w\s]', '', text)
-    text = re.sub(r'\s+', ' ', text)
-    return text
-
-
-def find_best_match(text: str):
-    """
-    Find the best matching dictionary key for any input text.
-    Handles case insensitive, punctuation differences, fuzzy word overlap.
-
-    Args:
-        text: Input English text from voice or keyboard
-
-    Returns:
-        Best matching dictionary key, or None if no match found
-    """
-    normalized_input = normalize(text)
-
-    # 1. Exact match after normalization
-    for key in REGIONAL_VARIANTS:
-        if normalize(key) == normalized_input:
-            return key
-
-    # 2. Fuzzy word overlap matching
-    input_words = set(normalized_input.split())
-    best_key = None
-    best_score = 0.0
-
-    for key in REGIONAL_VARIANTS:
-        key_words = set(normalize(key).split())
-        if not key_words:
-            continue
-        intersection = len(input_words & key_words)
-        union = len(input_words | key_words)
-        score = intersection / union if union > 0 else 0.0
-        if score > best_score:
-            best_score = score
-            best_key = key
-
-    if best_score >= 0.65:
-        return best_key
-
-    return None
-
-
-def get_regional_translation_fuzzy(text: str, region: str = "neutral"):
-    """
-    Get regional translation using fuzzy matching.
-    Use this for voice input and free text — handles case and punctuation.
-
-    Args:
-        text:   Any English text — voice transcription or typed
-        region: Region key
-
-    Returns:
-        tuple: (translation, notes) or (None, "") if no match
-    """
-    matched_key = find_best_match(text)
-    if matched_key:
-        return get_regional_translation(matched_key, region)
-    return None, "No regional variant found — use Google Translate"
+    print("\n=== BACK-TRANSLATION TEST ===")
+    test_cases = [
+        ("¿Tiene calentura?",       "Do you have a fever?"),
+        ("¿Tiene azúcar?",          "Do you have diabetes?"),
+        ("¿Dónde le duele?",        "Where does it hurt?"),
+        ("¿Le bajó?",               "When was your last menstrual period?"),
+        ("No coma ni tome nada",    "Do not eat or drink anything"),
+    ]
+    for spanish, expected in test_cases:
+        result = get_english_back_translation(spanish)
+        status = "PASS" if result == expected else "FAIL"
+        print(f"  {status}: '{spanish}' → '{result}'")
