@@ -49,8 +49,17 @@ if USE_LOCAL_TTS:
             _dir      = os.path.dirname(os.path.abspath(__file__))
             onnx_path = os.path.join(_dir, "es_MX-claude-high.onnx")
             json_path = os.path.join(_dir, "es_MX-claude-high.onnx.json")
-            if not os.path.exists(onnx_path):
-                raise FileNotFoundError(f"Piper model not found at {onnx_path}")
+
+            # Auto-download model files if missing (first run on Streamlit Cloud)
+            if not os.path.exists(onnx_path) or not os.path.exists(json_path):
+                import urllib.request
+                url_base = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/es/es_MX/claude/high"
+                with st.spinner("Downloading Spanish voice model (first time only, ~60MB)..."):
+                    if not os.path.exists(onnx_path):
+                        urllib.request.urlretrieve(f"{url_base}/es_MX-claude-high.onnx", onnx_path)
+                    if not os.path.exists(json_path):
+                        urllib.request.urlretrieve(f"{url_base}/es_MX-claude-high.onnx.json", json_path)
+
             return PiperVoice.load(onnx_path, config_path=json_path)
 
         piper_model = load_piper_model()
