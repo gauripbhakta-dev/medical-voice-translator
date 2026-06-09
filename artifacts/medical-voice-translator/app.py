@@ -93,14 +93,33 @@ if USE_LOCAL_TRANSLATION:
             import argostranslate.package
             argostranslate.package.update_package_index()
             available = argostranslate.package.get_available_packages()
-            installed = [(p.from_code, p.to_code)
-                         for p in argostranslate.package.get_installed_packages()]
+
+            # Force reinstall ES→EN to fix infinite loop bug in cached package
+            # Remove existing ES→EN package if present
+            for pkg in argostranslate.package.get_installed_packages():
+                if pkg.from_code == "es" and pkg.to_code == "en":
+                    try:
+                        pkg.remove()
+                    except Exception:
+                        pass
+
+            # Reinstall both packages fresh
             for fc, tc in [("en", "es"), ("es", "en")]:
-                if (fc, tc) not in installed:
-                    pkg = next((p for p in available
-                                if p.from_code == fc and p.to_code == tc), None)
-                    if pkg:
-                        argostranslate.package.install_from_path(pkg.download())
+                pkg = next((p for p in available
+                            if p.from_code == fc and p.to_code == tc), None)
+                if pkg:
+                    argostranslate.package.install_from_path(pkg.download())
+
+            # Verify ES→EN works with a simple test
+            try:
+                import argostranslate.translate
+                test = argostranslate.translate.translate("hola", "es", "en")
+                # If output is suspiciously long it is still looping
+                if len(test) > 50:
+                    return False  # Signal ES→EN is broken
+            except Exception:
+                return False
+
             return True
 
         setup_argos()
@@ -137,21 +156,34 @@ def translate_text(text: str, direction: str) -> str:
     # For Spanish→English check reverse dictionary first
     if direction == "es->en" and REGIONAL_VARIANTS_ENABLED:
         try:
+            # Exact match first
             back = get_english_back_translation(text.strip())
             if back:
                 return back
+            # Fuzzy match
             fuzzy = find_best_spanish_match(text.strip())
             if fuzzy:
                 return fuzzy
         except Exception:
             pass
 
-    # Local Argos — EN→ES only (ES→EN package has infinite loop bug)
-    if USE_LOCAL_TRANSLATION and LOCAL_TRANSLATION_AVAILABLE and direction == "en->es":
+    # Local Argos — with infinite loop guard
+    if USE_LOCAL_TRANSLATION and LOCAL_TRANSLATION_AVAILABLE:
         try:
             result = argostranslate.translate.translate(text, src, tgt)
             if result and result.strip():
-                return result
+                # Guard 1: reject if output is more than 5x input length
+                if len(result) > len(text) * 5:
+                    pass  # Fall through to Google Translate
+                # Guard 2: reject if repeated pattern detected (infinite loop)
+                elif len(result) > 30:
+                    chunk = result[:15]
+                    if result.count(chunk) > 2:
+                        pass  # Fall through to Google Translate
+                    else:
+                        return result
+                else:
+                    return result
         except Exception:
             pass
 
