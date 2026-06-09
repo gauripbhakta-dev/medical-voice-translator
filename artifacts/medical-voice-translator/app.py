@@ -167,21 +167,22 @@ def translate_text(text: str, direction: str) -> str:
         except Exception:
             pass
 
-    # Local Argos — with infinite loop guard
+    # Local Argos — with guards for known Streamlit Cloud bugs
     if USE_LOCAL_TRANSLATION and LOCAL_TRANSLATION_AVAILABLE:
         try:
             result = argostranslate.translate.translate(text, src, tgt)
             if result and result.strip():
-                # Guard 1: reject if output is more than 5x input length
+                input_words  = len(text.strip().split())
+                output_words = len(result.strip().split())
+                # Guard 1: infinite loop — output more than 5x input length
                 if len(result) > len(text) * 5:
                     pass  # Fall through to Google Translate
-                # Guard 2: reject if repeated pattern detected (infinite loop)
-                elif len(result) > 30:
-                    chunk = result[:15]
-                    if result.count(chunk) > 2:
-                        pass  # Fall through to Google Translate
-                    else:
-                        return result
+                # Guard 2: repeated pattern — infinite loop signature
+                elif len(result) > 30 and result.count(result[:15]) > 2:
+                    pass  # Fall through to Google Translate
+                # Guard 3: truncation — input has 3+ words but output has only 1
+                elif input_words >= 3 and output_words == 1:
+                    pass  # Fall through to Google Translate
                 else:
                     return result
         except Exception:
