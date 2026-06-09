@@ -137,19 +137,17 @@ def translate_text(text: str, direction: str) -> str:
     # For Spanish→English check reverse dictionary first
     if direction == "es->en" and REGIONAL_VARIANTS_ENABLED:
         try:
-            # Exact match first
             back = get_english_back_translation(text.strip())
             if back:
                 return back
-            # Fuzzy match
             fuzzy = find_best_spanish_match(text.strip())
             if fuzzy:
                 return fuzzy
         except Exception:
             pass
 
-    # Local Argos
-    if USE_LOCAL_TRANSLATION and LOCAL_TRANSLATION_AVAILABLE:
+    # Local Argos — EN→ES only (ES→EN package has infinite loop bug)
+    if USE_LOCAL_TRANSLATION and LOCAL_TRANSLATION_AVAILABLE and direction == "en->es":
         try:
             result = argostranslate.translate.translate(text, src, tgt)
             if result and result.strip():
