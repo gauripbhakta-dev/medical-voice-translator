@@ -331,6 +331,7 @@ def render_audio(b64: str):
 
 # ── PHRASE DATA ────────────────────────────────────────────────────────────────
 CATEGORY_LABELS = {
+    "🛏️ Comfort & Care":          {"es": "🛏️ Confort y cuidado"},
     "🩹 Pain Assessment":         {"es": "🩹 Evaluación del dolor"},
     "🤒 Symptoms":                {"es": "🤒 Síntomas"},
     "💊 Medications & Allergies": {"es": "💊 Medicamentos y alergias"},
@@ -340,6 +341,7 @@ CATEGORY_LABELS = {
 }
 
 CATEGORY_COLORS = {
+    "🛏️ Comfort & Care":          {"bg": "#E8F8F0", "border": "#1E8449", "text": "#145A32"},
     "🩹 Pain Assessment":         {"bg": "#E8F4FD", "border": "#0072B2", "text": "#004B75"},
     "🤒 Symptoms":                {"bg": "#FFF3E0", "border": "#E69F00", "text": "#7A5400"},
     "💊 Medications & Allergies": {"bg": "#E6F6F4", "border": "#009E73", "text": "#005740"},
@@ -349,6 +351,10 @@ CATEGORY_COLORS = {
 }
 
 MEDICAL_PHRASES = {
+    "🛏️ Comfort & Care": {
+        "en": ["Are you comfortable?","Are you cold?","Do you need a blanket?","Are you warm enough?","Do you need water?","Do you need to use the bathroom?","Do you need anything?","Are you having trouble sleeping?","Do you feel safe?","Your family has been notified","The nurse will be right with you","You are in good hands","Is there anything else I can do for you?"],
+        "es": ["¿Está cómodo/cómoda?","¿Tiene frío?","¿Necesita una cobija?","¿Tiene suficiente calor?","¿Necesita agua?","¿Necesita ir al baño?","¿Necesita algo?","¿Tiene problemas para dormir?","¿Se siente seguro/segura?","Su familia ha sido notificada","La enfermera estará con usted en un momento","Está en buenas manos","¿Hay algo más que pueda hacer por usted?"]
+    },
     "🩹 Pain Assessment": {
         "en": ["Where does it hurt?","Rate your pain from 1 to 10","Is the pain sharp or dull?","Is the pain constant or does it come and go?","Does the pain go anywhere else?","Does anything make the pain better?","Does anything make the pain worse?"],
         "es": ["¿Dónde le duele?","Califique su dolor del 1 al 10","¿El dolor es agudo o sordo?","¿El dolor es constante o va y viene?","¿El dolor se va a algún otro lugar?","¿Hay algo que mejore el dolor?","¿Hay algo que empeore el dolor?"]

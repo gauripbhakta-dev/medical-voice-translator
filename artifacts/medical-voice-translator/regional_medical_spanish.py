@@ -447,6 +447,91 @@ REGIONAL_VARIANTS = {
         "cuban":        "Llame al 911 si tiene una emergencia",
         "notes": "Universally consistent — 911 is the same across all US regions"
     },
+
+    "Are you comfortable?": {
+        "neutral": "¿Está cómodo/cómoda?", "dominican": "¿Está bien así?",
+        "puerto_rican": "¿Está cómodo/cómoda?", "mexican": "¿Está cómodo/cómoda?",
+        "colombian": "¿Está cómodo/cómoda?", "cuban": "¿Está bien así?",
+        "notes": "Dominican and Cuban prefer the informal '¿Está bien así?'"
+    },
+    "Are you cold?": {
+        "neutral": "¿Tiene frío?", "dominican": "¿Tiene frío?",
+        "puerto_rican": "¿Tiene frío?", "mexican": "¿Tiene frío?",
+        "colombian": "¿Tiene frío?", "cuban": "¿Tiene frío?",
+        "notes": "Universally consistent"
+    },
+    "Do you need a blanket?": {
+        "neutral": "¿Necesita una cobija?", "dominican": "¿Necesita una frazada?",
+        "puerto_rican": "¿Necesita una manta?", "mexican": "¿Necesita una cobija?",
+        "colombian": "¿Necesita una cobija?", "cuban": "¿Necesita una frazada?",
+        "notes": "IMPORTANT: Cobija (neutral/MX/CO), frazada (Dominican/Cuban), manta (Puerto Rican)"
+    },
+    "Are you warm enough?": {
+        "neutral": "¿Tiene suficiente calor?", "dominican": "¿Está bien de temperatura?",
+        "puerto_rican": "¿Está bien de temperatura?", "mexican": "¿Tiene suficiente calor?",
+        "colombian": "¿Tiene suficiente calor?", "cuban": "¿Está bien de temperatura?",
+        "notes": "Caribbean patients prefer '¿Está bien de temperatura?'"
+    },
+    "Do you need water?": {
+        "neutral": "¿Necesita agua?", "dominican": "¿Quiere agua?",
+        "puerto_rican": "¿Quiere agua?", "mexican": "¿Necesita agua?",
+        "colombian": "¿Necesita agua?", "cuban": "¿Quiere agua?",
+        "notes": "Querer more natural than necesitar for comfort requests in Caribbean Spanish"
+    },
+    "Do you need to use the bathroom?": {
+        "neutral": "¿Necesita ir al baño?", "dominican": "¿Necesita ir al baño?",
+        "puerto_rican": "¿Necesita usar el servicio?", "mexican": "¿Necesita ir al baño?",
+        "colombian": "¿Necesita ir al baño?", "cuban": "¿Necesita ir al baño?",
+        "notes": "Puerto Rican patients say el servicio for bathroom"
+    },
+    "Do you need anything?": {
+        "neutral": "¿Necesita algo?", "dominican": "¿Necesita algo?",
+        "puerto_rican": "¿Necesita algo?", "mexican": "¿Necesita algo?",
+        "colombian": "¿Necesita algo?", "cuban": "¿Necesita algo?",
+        "notes": "Universally consistent"
+    },
+    "Are you having trouble sleeping?": {
+        "neutral": "¿Tiene problemas para dormir?", "dominican": "¿Puede dormir bien?",
+        "puerto_rican": "¿Puede dormir bien?", "mexican": "¿Tiene problemas para dormir?",
+        "colombian": "¿Tiene problemas para dormir?", "cuban": "¿Puede dormir bien?",
+        "notes": "Caribbean patients prefer the positive framing '¿Puede dormir bien?'"
+    },
+    "Do you feel safe?": {
+        "neutral": "¿Se siente seguro/segura?", "dominican": "¿Se siente seguro/segura?",
+        "puerto_rican": "¿Se siente seguro/segura?", "mexican": "¿Se siente seguro/segura?",
+        "colombian": "¿Se siente seguro/segura?", "cuban": "¿Se siente seguro/segura?",
+        "notes": "Universally consistent — important for detecting domestic violence"
+    },
+    "Your family has been notified": {
+        "neutral": "Su familia ha sido notificada", "dominican": "Ya le avisamos a su familia",
+        "puerto_rican": "Ya le avisamos a su familia", "mexican": "Ya le avisamos a su familia",
+        "colombian": "Su familia ha sido notificada", "cuban": "Ya le avisamos a su familia",
+        "notes": "Informal 'Ya le avisamos' warmer and more commonly understood"
+    },
+    "The nurse will be right with you": {
+        "neutral": "La enfermera estará con usted en un momento",
+        "dominican": "La enfermera viene ahora mismo",
+        "puerto_rican": "La enfermera viene enseguida",
+        "mexican": "La enfermera viene en un momento",
+        "colombian": "La enfermera estará con usted enseguida",
+        "cuban": "La enfermera viene enseguida",
+        "notes": "Dominican: ahora mismo. Puerto Rican/Cuban: enseguida"
+    },
+    "You are in good hands": {
+        "neutral": "Está en buenas manos", "dominican": "Está en buenas manos",
+        "puerto_rican": "Está en buenas manos", "mexican": "Está en buenas manos",
+        "colombian": "Está en buenas manos", "cuban": "Está en buenas manos",
+        "notes": "Universally consistent"
+    },
+    "Is there anything else I can do for you?": {
+        "neutral": "¿Hay algo más que pueda hacer por usted?",
+        "dominican": "¿Hay algo más que le pueda hacer?",
+        "puerto_rican": "¿Hay algo más que pueda hacer por usted?",
+        "mexican": "¿Hay algo más que pueda hacer por usted?",
+        "colombian": "¿Hay algo más que pueda hacer por usted?",
+        "cuban": "¿Hay algo más que le pueda hacer?",
+        "notes": "Minor variation — all mutually comprehensible"
+    },
 }
 
 # =============================================================================
@@ -590,6 +675,34 @@ SPANISH_TO_ENGLISH = {
     "Consulte con su médico en una semana":     "Follow up with your doctor in one week",
     "Vea a su médico en una semana":            "Follow up with your doctor in one week",
     "Llame al 911 si tiene una emergencia":     "Call 911 if you have an emergency",
+
+    # Comfort & Care
+    "¿Está cómodo/cómoda?":                        "Are you comfortable?",
+    "¿Está bien así?":                              "Are you comfortable?",
+    "¿Tiene frío?":                                 "Are you cold?",
+    "¿Necesita una cobija?":                        "Do you need a blanket?",
+    "¿Necesita una frazada?":                       "Do you need a blanket?",
+    "¿Necesita una manta?":                         "Do you need a blanket?",
+    "¿Tiene suficiente calor?":                     "Are you warm enough?",
+    "¿Está bien de temperatura?":                   "Are you warm enough?",
+    "¿Necesita agua?":                              "Do you need water?",
+    "¿Quiere agua?":                                "Do you need water?",
+    "¿Necesita ir al baño?":                        "Do you need to use the bathroom?",
+    "¿Necesita usar el servicio?":                  "Do you need to use the bathroom?",
+    "¿Necesita algo?":                              "Do you need anything?",
+    "¿Tiene problemas para dormir?":                "Are you having trouble sleeping?",
+    "¿Puede dormir bien?":                          "Are you having trouble sleeping?",
+    "¿Se siente seguro/segura?":                    "Do you feel safe?",
+    "Su familia ha sido notificada":                "Your family has been notified",
+    "Ya le avisamos a su familia":                  "Your family has been notified",
+    "La enfermera estará con usted en un momento":  "The nurse will be right with you",
+    "La enfermera viene ahora mismo":               "The nurse will be right with you",
+    "La enfermera viene enseguida":                 "The nurse will be right with you",
+    "La enfermera viene en un momento":             "The nurse will be right with you",
+    "La enfermera estará con usted enseguida":      "The nurse will be right with you",
+    "Está en buenas manos":                         "You are in good hands",
+    "¿Hay algo más que pueda hacer por usted?":     "Is there anything else I can do for you?",
+    "¿Hay algo más que le pueda hacer?":            "Is there anything else I can do for you?",
 }
 
 
