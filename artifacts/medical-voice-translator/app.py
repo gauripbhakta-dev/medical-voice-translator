@@ -199,6 +199,8 @@ def translate_text(text: str, direction: str) -> str:
 
 # ── AUDIO GENERATION ───────────────────────────────────────────────────────────
 def generate_audio_b64(text: str, lang: str):
+    # Clean up garbled Argos output
+    text = text.split("\n")[0].strip()
     text = text.replace("911", "9-1-1").replace("9-1-1-1-1", "9-1-1")
 
     # Piper TTS fix — silent H mispronounced as T
@@ -207,7 +209,9 @@ def generate_audio_b64(text: str, lang: str):
             text = text.replace(wrong, correct)
 
     # Piper TTS — local, no external calls, best Spanish quality
-    if USE_LOCAL_TTS and LOCAL_TTS_AVAILABLE and lang == "es":
+    # Skip Piper for phrases containing Hola — Piper mispronounces it as Tola
+    piper_skip = lang == "es" and any(w in text for w in ["Hola", "hola", "Ola", "ola"])
+    if USE_LOCAL_TTS and LOCAL_TTS_AVAILABLE and lang == "es" and not piper_skip:
         try:
             buf      = io.BytesIO()
             wav_file = wave.open(buf, "wb")
