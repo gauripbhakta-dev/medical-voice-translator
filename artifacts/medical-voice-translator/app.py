@@ -201,6 +201,11 @@ def translate_text(text: str, direction: str) -> str:
 def generate_audio_b64(text: str, lang: str):
     text = text.replace("911", "9-1-1").replace("9-1-1-1-1", "9-1-1")
 
+    # Piper TTS fix — silent H mispronounced as T
+    if USE_LOCAL_TTS and LOCAL_TTS_AVAILABLE and lang == "es":
+        for wrong, correct in {"Hola":"Ola","hola":"ola","Hasta":"Asta","hasta":"asta","Hay":"Ai","hay":"ai","Han":"An","han":"an"}.items():
+            text = text.replace(wrong, correct)
+
     # Piper TTS — local, no external calls, best Spanish quality
     if USE_LOCAL_TTS and LOCAL_TTS_AVAILABLE and lang == "es":
         try:
