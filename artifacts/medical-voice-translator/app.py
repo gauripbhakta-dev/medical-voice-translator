@@ -91,37 +91,40 @@ if USE_LOCAL_TRANSLATION:
         @st.cache_resource
         def setup_argos():
             import argostranslate.package
-            argostranslate.package.update_package_index()
-            available = argostranslate.package.get_available_packages()
+            import argostranslate.translate as at
 
-            # Force reinstall ES→EN to fix infinite loop bug in cached package
-            # Remove existing ES→EN package if present
-            for pkg in argostranslate.package.get_installed_packages():
-                if pkg.from_code == "es" and pkg.to_code == "en":
-                    try:
-                        pkg.remove()
-                    except Exception:
-                        pass
+            # Test if packages already work — skip reinstall if they do
+            installed_codes = [(p.from_code, p.to_code)
+                               for p in argostranslate.package.get_installed_packages()]
+            en_es_ok = False
+            es_en_ok = False
 
-            # Reinstall both packages fresh
-            for fc, tc in [("en", "es"), ("es", "en")]:
-                pkg = next((p for p in available
-                            if p.from_code == fc and p.to_code == tc), None)
-                if pkg:
-                    argostranslate.package.install_from_path(pkg.download())
+            if ("en", "es") in installed_codes:
+                try:
+                    result = at.translate("fever", "en", "es")
+                    en_es_ok = result and len(result) < 100 and len(result) > 1
+                except Exception:
+                    pass
 
-            # Verify ES→EN works with a simple test
-            try:
-                import argostranslate.translate
-                test = argostranslate.translate.translate("hola", "es", "en")
-                # If output is suspiciously long it is still looping
-                if len(test) > 50:
-                    return False  # Signal ES→EN is broken
-            except Exception:
-                return False
+            if ("es", "en") in installed_codes:
+                try:
+                    result = at.translate("hola", "es", "en")
+                    es_en_ok = result and len(result) < 50 and len(result) > 1
+                except Exception:
+                    pass
+
+            # Only reinstall packages that are missing or broken
+            if not en_es_ok or not es_en_ok:
+                argostranslate.package.update_package_index()
+                available = argostranslate.package.get_available_packages()
+                for fc, tc, ok in [("en", "es", en_es_ok), ("es", "en", es_en_ok)]:
+                    if not ok:
+                        pkg = next((p for p in available
+                                    if p.from_code == fc and p.to_code == tc), None)
+                        if pkg:
+                            argostranslate.package.install_from_path(pkg.download())
 
             return True
-
         setup_argos()
         LOCAL_TRANSLATION_AVAILABLE = True
     except Exception as e:
