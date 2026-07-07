@@ -1,6 +1,6 @@
 # 🩺 Medical Voice Translator
 
-A web app that helps hospital staff communicate with Spanish-speaking patients by translating medical phrases between English and Spanish — with voice input and audio playback.
+A free, browser-based bilingual clinical communication tool for English-Spanish translation in emergency department and hospital settings, designed for use with limited English proficiency (LEP) patients.
 
 **Live App:** [medvoice-translator.streamlit.app](https://medvoice-translator.streamlit.app)
 
@@ -8,44 +8,69 @@ A web app that helps hospital staff communicate with Spanish-speaking patients b
 
 ## About
 
-Built by **Gauri Bhakta**, a 10th grade student and hospital volunteer, after noticing that language barriers made it difficult for staff to communicate with Spanish-speaking patients. This app provides a fast, phone-friendly tool that any staff member can use without downloading anything.
+Built by **Gauri Bhakta**, a Phillips Academy Andover student and Lawrence General Hospital Emergency Department volunteer, after observing firsthand that language barriers between clinical staff and Spanish-speaking patients created preventable communication failures and health equity gaps.
+
+The app provides instant point-of-care translation with community-specific regional Spanish variants — recognizing that a Dominican patient may not recognize "diabetes" but responds to "azúcar," and that a Puerto Rican patient uses "el servicio" for bathroom rather than "el baño."
 
 ---
 
 ## Features
 
+- 🌎 **Regional Spanish variants** — 6 community-specific dialects: Dominican Republic, Puerto Rico, Mexico, Colombia, Cuba, and General Spanish
 - 🔄 **Bidirectional translation** — English → Spanish and Spanish → English
-- 🎙️ **Voice input** — record your phrase and it auto-transcribes and translates
-- 🔊 **Audio playback** — hear the translation spoken aloud for the patient
-- ⚕️ **36 preset clinical phrases** across 6 categories:
-  - Pain Assessment
-  - Symptoms
-  - Medications & Allergies
-  - Medical History
-  - Consent & Instructions
-  - Emergency
-- 🌐 **Full bilingual UI** — the entire interface switches to Spanish when in ES → EN mode
-- 📱 **Mobile optimized** — works on iPhone, Android, and desktop
-- 🔒 **No data stored** — nothing is recorded or saved
+- 🎙️ **Local voice input** — OpenAI Whisper (tiny model) transcribes locally — no audio transmitted externally
+- 🔊 **Local audio playback** — Piper TTS (es_MX-claude-high) generates natural Spanish audio locally — no external API calls
+- 🔒 **HIPAA compliant by architecture** — all processing runs on-device with zero external data transmission
+- 📱 **Zero installation** — works on any phone or tablet browser, no app download required
+- 🏥 **53 validated clinical phrases** across 7 categories
 
----
+## Phrase Categories
 
-## Disclaimer
-
-For communication assistance only. Not a substitute for a certified medical interpreter.
-
----
-
-## Tech Stack
-
-| Component | Technology |
+| Category | Phrases |
 |---|---|
-| UI Framework | Streamlit |
-| Translation | deep-translator (Google Translate) |
-| Text-to-Speech | gTTS (Google Text-to-Speech) |
-| Voice Input | SpeechRecognition + st.audio_input |
-| Deployment | Streamlit Community Cloud |
-| Version Control | GitHub |
+| 🛏️ Comfort & Care | 13 |
+| 🩹 Pain Assessment | 7 |
+| 🤒 Symptoms | 8 |
+| 💊 Medications & Allergies | 2 |
+| 📋 Medical History | 6 |
+| ✅ Consent & Instructions | 11 |
+| 🚨 Emergency | 6 |
+
+---
+
+## Architecture — Fully Local
+
+| Component | Library | License | Replaces |
+|---|---|---|---|
+| UI Framework | Streamlit 1.35 | Apache 2.0 | — |
+| Translation | Argos Translate 1.9.1 | MIT | Google Translate API |
+| Text-to-Speech | Piper TTS (es_MX-claude-high) | MIT | Google gTTS |
+| Speech Recognition | OpenAI Whisper tiny | MIT | Web Speech API |
+| Regional Routing | Custom Jaccard fuzzy matching | — | None |
+
+All four core components run locally. No patient data, audio, or text is transmitted to any external service during normal operation.
+
+---
+
+## Intellectual Property
+
+A provisional patent application (USPTO Application No. 64/105,618, filed July 6, 2026) is pending covering the language community lexical routing system described in this project.
+
+Inventor: Gauri P. Bhakta. Legal Guardian: Prashant Kumar.
+
+---
+
+## Research
+
+A peer-reviewed research paper is in preparation in collaboration with **Dr. Diana Rojas-Soto, MD** (Dartmouth Geisel School of Medicine, Co-Director, Medical Spanish Pathway of Distinction). Target journal: JAMIA Open.
+
+The Comfort & Care phrase category was developed based on clinical feedback from **Dr. Alisa Khan, MD, MPH** (Director, Program for Language Equity, Boston Children's Hospital; Harvard Medical School).
+
+---
+
+## Clinical Context
+
+Language barriers affect approximately 25 million Americans with limited English proficiency and represent a persistent source of health inequity and preventable clinical error. This tool was developed through direct observation at Lawrence General Hospital Emergency Department and clinical consultation with Harvard Medical School and Dartmouth Geisel School of Medicine faculty.
 
 ---
 
@@ -60,6 +85,7 @@ cd medical-voice-translator
 **2. Install dependencies**
 ```bash
 pip install -r artifacts/medical-voice-translator/requirements.txt
+apt-get install espeak-ng
 ```
 
 **3. Run the app**
@@ -75,10 +101,13 @@ streamlit run artifacts/medical-voice-translator/app.py
 medical-voice-translator/
 ├── artifacts/
 │   └── medical-voice-translator/
-│       ├── app.py               # Main Streamlit app
-│       ├── requirements.txt     # Python dependencies
-│       └── .streamlit/
-│           └── config.toml      # Streamlit server config
+│       ├── app.py                        # Main Streamlit app
+│       ├── regional_medical_spanish.py   # Regional variant dictionary
+│       ├── test_app.py                   # Automated test suite (15 tests)
+│       ├── requirements.txt              # Python dependencies
+│       ├── packages.txt                  # System dependencies (espeak-ng)
+│       ├── es_MX-claude-high.onnx        # Piper TTS voice model
+│       └── es_MX-claude-high.onnx.json   # Piper TTS voice config
 └── README.md
 ```
 
@@ -86,24 +115,14 @@ medical-voice-translator/
 
 ## Deployment
 
-The app is deployed on **Streamlit Community Cloud** and automatically redeploys whenever code is pushed to the `main` branch on GitHub.
+Deployed on **Streamlit Community Cloud** with automatic redeployment on push to `main`. UptimeRobot monitors availability.
 
 ---
 
-## Background
+## Disclaimer
 
-This project was developed as part of a hospital volunteer experience where language barriers between staff and Spanish-speaking patients were a recurring challenge. The app was designed to be simple enough for any staff member to pick up and use immediately — no training required.
-
----
-
-## Future Improvements
-
-- [ ] Add more language pairs (Portuguese, French, Mandarin, Arabic)
-- [ ] Expand phrase library with more clinical scenarios
-- [ ] Offline mode for areas with poor connectivity
-- [ ] Export translation session as PDF
-- [ ] Collect staff feedback through in-app survey
+For communication assistance only. Not a substitute for a certified medical interpreter for complex clinical conversations.
 
 ---
 
-*Built with ❤️ by Gauri Bhakta — Grade 10*
+*Built by **Gauri Bhakta** · Phillips Academy Andover · Class of 2028 · gauripbhakta@gmail.com*
