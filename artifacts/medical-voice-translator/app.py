@@ -19,6 +19,11 @@ import wave
 import base64
 import tempfile
 import streamlit as st
+st.set_page_config(
+    page_title="Medical Voice Translator",
+    page_icon="🩺",
+    layout="centered"
+)
 import streamlit.components.v1 as components
 
 # ── FEATURE FLAGS ──────────────────────────────────────────────────────────────
