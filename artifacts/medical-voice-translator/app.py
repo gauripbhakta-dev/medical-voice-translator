@@ -423,7 +423,7 @@ UI = {
 }
 
 # ── GOOGLE ANALYTICS ───────────────────────────────────────────────────────────
-components.html("""
+st.markdown("""
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-PM770KN3NX"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -431,7 +431,7 @@ components.html("""
   gtag('js', new Date());
   gtag('config', 'G-PM770KN3NX');
 </script>
-""", height=0)
+""", unsafe_allow_html=True)
 
 # ── STYLES ─────────────────────────────────────────────────────────────────────
 st.markdown("""
