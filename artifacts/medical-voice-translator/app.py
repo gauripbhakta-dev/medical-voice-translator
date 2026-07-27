@@ -423,15 +423,22 @@ UI = {
 }
 
 # ── GOOGLE ANALYTICS ───────────────────────────────────────────────────────────
-st.markdown("""
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-PM770KN3NX"></script>
+components.html("""
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-PM770KN3NX');
+(function() {
+    var doc = window.parent.document;
+    if (doc.getElementById('ga-script')) return;
+    var s1 = doc.createElement('script');
+    s1.id = 'ga-script';
+    s1.async = true;
+    s1.src = 'https://www.googletagmanager.com/gtag/js?id=G-PM770KN3NX';
+    doc.head.appendChild(s1);
+    var s2 = doc.createElement('script');
+    s2.text = 'window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-PM770KN3NX");';
+    doc.head.appendChild(s2);
+})();
 </script>
-""", unsafe_allow_html=True)
+""", height=0)
 
 # ── STYLES ─────────────────────────────────────────────────────────────────────
 st.markdown("""
