@@ -1,6 +1,6 @@
 """
-Medical Voice Translator — Fully Local HIPAA-Compliant Version
-==============================================================
+Medical Voice Translator — Local-First Architecture
+===================================================
 Feature flags:
 
 REGIONAL_VARIANTS_ENABLED = True   → Regional Spanish variants
@@ -8,7 +8,9 @@ USE_LOCAL_TTS             = True   → Piper TTS (local) vs gTTS (Google)
 USE_LOCAL_WHISPER         = True   → Whisper (local) vs Web Speech API
 USE_LOCAL_TRANSLATION     = True   → Argos (local) vs Google Translate
 
-All True  = fully HIPAA compliant by architecture
+All True  = local-first: on-device processing where available.
+            Note: falls back to Google services when Argos, Piper,
+            or Whisper fail. Not a HIPAA-compliant deployment.
 All False = original Google-dependent version
 """
 
@@ -479,9 +481,14 @@ mic_lang_code = "en-US" if direction == "en->es" else "es-ES"
 lang_key      = "en" if direction == "en->es" else "es"
 
 # ── HEADER ─────────────────────────────────────────────────────────────────────
-hipaa_badge = ""
+local_badge = ""
 if USE_LOCAL_TTS and USE_LOCAL_WHISPER and USE_LOCAL_TRANSLATION:
-    hipaa_badge = '<div style="font-size:10px;color:#90EE90;margin-top:4px;">🔒 Fully Local — HIPAA Compliant by Architecture</div>'
+    local_badge = (
+        '<div style="font-size:10px;color:#F5C77E;margin-top:4px;">'
+        '🖥️ Local processing where available — demonstration only. '
+        'Do not enter patient information.'
+        '</div>'
+    )
 
 st.markdown(f"""
 <div style="background:#1F4E79;border-radius:12px;padding:16px 18px;margin-bottom:16px;">
@@ -492,7 +499,7 @@ st.markdown(f"""
     <div style="font-size:11px;color:#B5D4F4;margin-top:4px;">
         English &#8596; Spanish &nbsp;·&nbsp; Audio Playback &nbsp;·&nbsp; Voice Input
     </div>
-    {hipaa_badge}
+    {local_badge}
     <div style="font-size:10px;color:#7aadd4;margin-top:8px;padding-top:8px;
                 border-top:1px solid rgba(255,255,255,0.15);">
         {ui['disclaimer']}
