@@ -485,7 +485,7 @@ local_badge = ""
 if USE_LOCAL_TTS and USE_LOCAL_WHISPER and USE_LOCAL_TRANSLATION:
     local_badge = (
         '<div style="font-size:10px;color:#F5C77E;margin-top:4px;">'
-        '🖥️ Local processing where available — demonstration only. '
+        '🖥️ Local processing where available. '
         'Do not enter patient information.'
         '</div>'
     )
