@@ -1,5 +1,8 @@
 # 🩺 Medical Voice Translator
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21879051.svg)](https://doi.org/10.5281/zenodo.21879051)
+
+
 A free, browser-based bilingual clinical communication tool for English-Spanish translation in emergency department and hospital settings, designed for use with limited English proficiency (LEP) patients.
 
 **Live App:** [medvoice-translator.streamlit.app](https://medvoice-translator.streamlit.app)
@@ -125,4 +128,14 @@ For communication assistance only. Not a substitute for a certified medical inte
 
 ---
 
-*Built by **Gauri Bhakta** · Phillips Academy Andover · Class of 2028 · gauripbhakta@gmail.com*
+
+## Citation
+
+Bhakta, G. P. (2026). Precision Communication: A Lexical Routing Approach to
+Community-Specific Clinical Translation for Spanish-Speaking Patients (Version v1).
+Zenodo. https://doi.org/10.5281/zenodo.21879051
+
+
+
+*Built by **Gauri P Bhakta** · Phillips Academy Andover · Class of 2028 · gauripbhakta@gmail.com*
+
