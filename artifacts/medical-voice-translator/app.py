@@ -640,7 +640,13 @@ st.divider()
 st.markdown("""
 <div style="text-align:center;padding:8px 0 4px 0;">
     <p style="font-size:12px;color:#aaa;margin:0;">
-        Built by <b style="color:#888;">Gauri Bhakta</b>, Phillips Academy · Inspired by real patients
+        Built by <b style="color:#888;">Gauri P Bhakta</b>, Phillips Academy · Inspired by real patients
+    </p>
+    <p style="font-size:11px;color:#aaa;margin:6px 0 0 0;">
+        Documented in: Bhakta, G. P. (2026). <i>Precision Communication: A Lexical Routing
+        Approach to Community-Specific Clinical Translation for Spanish-Speaking Patients</i>
+        (Version v1). Zenodo.
+        <a href="https://doi.org/10.5281/zenodo.21879051" style="color:#aaa;">doi.org/10.5281/zenodo.21879051</a>
     </p>
 </div>
 """, unsafe_allow_html=True)
