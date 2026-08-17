@@ -1,0 +1,36 @@
+# Keeps medvoice-translator.streamlit.app awake by actually clicking
+# the Streamlit "wake up" button, not just pinging the URL.
+#
+# Where to put this file: .github/workflows/keep-medvoice-awake.yml
+# in the medical-voice-translator repo.
+#
+# Cost: $0. GitHub Actions is free and unlimited on public repositories.
+#
+# Schedule: every 6 hours, comfortably inside Streamlit Community
+# Cloud's 12-hour sleep window. Adjust the cron line if you want it
+# tighter (e.g. "0 */4 * * *" for every 4 hours).
+
+name: Keep MedVoice Translator Awake
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch: {}   # lets you trigger it manually from the Actions tab
+
+jobs:
+  wake:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Selenium
+        run: pip install selenium
+
+      - name: Run wake script
+        run: python scripts/wake_streamlit.py
