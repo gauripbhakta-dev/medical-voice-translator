@@ -1,15 +1,17 @@
+#!/usr/bin/env python3
 """
-Wakes the MedVoice Translator Streamlit app if it has gone to sleep.
+Keeps medvoice-translator.streamlit.app awake.
 
-Why this exists: a plain HTTP ping (curl, UptimeRobot, etc.) hits the
-static "Yes, get this app back up!" page and gets a 200 OK response —
-which looks successful to the monitor — but nothing actually gets
-clicked, so the app never wakes up. This script uses a real (headless)
-browser to detect the wake button and click it, the same way a human
-visiting the link would.
+Streamlit Community Cloud puts an app to sleep after inactivity. A plain
+HTTP ping is not enough: the sleep page itself returns 200 OK, so uptime
+monitors report the app as "up" while it is actually asleep. Waking it
+requires clicking the "Yes, get this app back up!" button, which needs a
+real browser.
 
-If the app is already awake, this script finds no wake button and
-exits cleanly — safe to run on a schedule indefinitely.
+This script loads the page headlessly, clicks the button if it is there,
+and exits quietly if the app was already awake.
+
+Runs from .github/workflows/keep-medvoice-awake.yml
 """
 
 import sys
@@ -18,54 +20,77 @@ import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import WebDriverException
 
 APP_URL = "https://medvoice-translator.streamlit.app"
-PAGE_LOAD_WAIT = 5      # seconds to let the initial page settle
-BUTTON_WAIT = 10        # seconds to wait for the wake button to appear
-BOOT_WAIT = 20          # seconds to let the app boot after clicking wake
-
-# Streamlit's wake-up button text as of 2026. If Streamlit changes this
-# copy, update the XPATH match below accordingly.
-WAKE_BUTTON_XPATH = "//button[contains(., 'get this app back up')]"
+PAGE_LOAD_WAIT = 12      # seconds to let the page settle
+POST_CLICK_WAIT = 45     # container restart is slow; give it room
 
 
-def main() -> int:
-    options = Options()
-    options.add_argument("--headless=new")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--window-size=1280,900")
+def build_driver():
+    opts = Options()
+    opts.add_argument("--headless=new")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument("--disable-dev-shm-usage")
+    opts.add_argument("--window-size=1280,900")
+    # Selenium 4 resolves the driver itself; no chromedriver install needed.
+    return webdriver.Chrome(options=opts)
 
-    driver = webdriver.Chrome(options=options)
+
+def find_wake_button(driver):
+    """Streamlit has changed this button's markup before, so try a few ways."""
+    selectors = [
+        (By.XPATH, "//button[contains(., 'get this app back up')]"),
+        (By.XPATH, "//button[contains(., 'Yes, get this app back up')]"),
+        (By.XPATH, "//*[@data-testid='wakeup-button-viewer']"),
+        (By.XPATH, "//button[contains(., 'back up')]"),
+    ]
+    for how, what in selectors:
+        try:
+            el = driver.find_element(how, what)
+            if el.is_displayed():
+                return el
+        except Exception:
+            continue
+    return None
+
+
+def main():
+    driver = None
     try:
-        print(f"Visiting {APP_URL} ...")
+        driver = build_driver()
+        print(f"Loading {APP_URL}")
         driver.get(APP_URL)
         time.sleep(PAGE_LOAD_WAIT)
 
-        try:
-            wake_button = WebDriverWait(driver, BUTTON_WAIT).until(
-                EC.element_to_be_clickable((By.XPATH, WAKE_BUTTON_XPATH))
-            )
-            print("App was asleep. Clicking wake button ...")
-            wake_button.click()
-            time.sleep(BOOT_WAIT)
-            print("Wake click sent. App should be booting.")
-        except Exception:
-            print("No wake button found — app was already awake.")
+        button = find_wake_button(driver)
 
+        if button is None:
+            print("No wake button found - app was already awake.")
+            return 0
+
+        print("App was asleep. Clicking wake button...")
+        button.click()
+        time.sleep(POST_CLICK_WAIT)
+
+        still_asleep = find_wake_button(driver)
+        if still_asleep is None:
+            print("App is back up.")
+            return 0
+
+        print("Clicked, but the app has not finished restarting yet.")
+        print("This is usually fine - the next scheduled run will confirm.")
         return 0
 
+    except WebDriverException as exc:
+        print(f"Browser error: {exc}")
+        return 1
     except Exception as exc:
-        # Don't fail the whole workflow loudly over a transient network
-        # blip; log it so it's visible in the Actions run, but exit 0
-        # so this doesn't spam email alerts for a one-off hiccup.
-        print(f"Wake check encountered an error: {exc}")
-        return 0
-
+        print(f"Unexpected error: {exc}")
+        return 1
     finally:
-        driver.quit()
+        if driver is not None:
+            driver.quit()
 
 
 if __name__ == "__main__":
