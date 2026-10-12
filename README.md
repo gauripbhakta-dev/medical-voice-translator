@@ -21,11 +21,11 @@ The app provides instant point-of-care translation with community-specific regio
 
 - 🌎 **Regional Spanish variants** — 6 community-specific dialects: Dominican Republic, Puerto Rico, Mexico, Colombia, Cuba, and General Spanish
 - 🔄 **Bidirectional translation** — English → Spanish and Spanish → English
-- 🎙️ **Local voice input** — OpenAI Whisper (tiny model) transcribes locally — no audio transmitted externally
-- 🔊 **Local audio playback** — Piper TTS (es_MX-claude-high) generates natural Spanish audio locally — no external API calls
-- 🔒 **HIPAA compliant by architecture** — all processing runs on-device with zero external data transmission
+- 🎙️ **Self-hosted voice input** — OpenAI Whisper (tiny model) transcribes speech within the app, without sending audio to a cloud speech service
+- 🔊 **Self-hosted audio playback** — Piper TTS (es_MX-claude-high) generates natural Spanish audio within the app, without external API calls
+- 🔒 **Privacy-first design** — core processing runs within the app instead of third-party translation services (see note below on the public demo)
 - 📱 **Zero installation** — works on any phone or tablet browser, no app download required
-- 🏥 **53 validated clinical phrases** across 7 categories
+- 🏥 **53 clinical phrases** across 7 categories
 
 ## Phrase Categories
 
@@ -41,7 +41,7 @@ The app provides instant point-of-care translation with community-specific regio
 
 ---
 
-## Architecture — Fully Local
+## Architecture — Self-Hosted Processing
 
 | Component | Library | License | Replaces |
 |---|---|---|---|
@@ -51,7 +51,9 @@ The app provides instant point-of-care translation with community-specific regio
 | Speech Recognition | OpenAI Whisper tiny | MIT | Web Speech API |
 | Regional Routing | Custom Jaccard fuzzy matching | — | None |
 
-All four core components run locally. No patient data, audio, or text is transmitted to any external service during normal operation.
+All four core components run inside the app on its host server, rather than through third-party translation or speech APIs. For the public demo, that server is Streamlit Community Cloud, not the user's device.
+
+**Public demo note:** Piper generates Spanish audio only; English audio playback uses Google text-to-speech. If a local component fails to load, the app also falls back to Google Translate or Google speech recognition, and it uses Google Analytics for anonymous usage statistics. For these reasons, the public demo is **not HIPAA-compliant** and should not be used with real patient information. The design is intended to support a fully self-hosted deployment in a clinical setting in the future.
 
 ---
 
